@@ -8,7 +8,6 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Scheduly">
-    <link rel="manifest" href="manifest.json">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -16,181 +15,187 @@
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
                 }
             }
         }
     </script>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 
     <style>
         body { scroll-behavior: smooth; }
-        .fade-in { animation: fadeIn 0.4s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        ::-webkit-scrollbar { width: 8px; }
+        .fade-in { animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .dark ::-webkit-scrollbar-thumb { background: #475569; }
+        
+        /* Custom Checkbox */
+        .checkbox-custom:checked + div { background-color: #4f46e5; border-color: #4f46e5; }
+        .checkbox-custom:checked + div svg { display: block; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen pb-12 transition-colors duration-300">
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen pb-12 transition-colors duration-300 relative overflow-x-hidden">
 
-    <div id="skeleton-screen" class="fixed inset-0 z-[100] bg-slate-50 dark:bg-slate-900 p-6 space-y-6">
-        <div class="max-w-7xl mx-auto animate-pulse space-y-8">
-            <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-4">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-slate-200 dark:bg-slate-700 rounded-xl"></div>
-                    <div class="space-y-2">
-                        <div class="w-24 h-4 bg-slate-200 dark:bg-slate-700 rounded"></div>
-                        <div class="w-16 h-3 bg-slate-200 dark:bg-slate-700 rounded"></div>
-                    </div>
-                </div>
-                <div class="w-32 h-10 bg-slate-200 dark:bg-slate-700 rounded-xl"></div>
-            </div>
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div class="w-full h-80 bg-slate-200 dark:bg-slate-700 rounded-3xl"></div>
-                <div class="lg:col-span-2 space-y-4">
-                    <div class="w-full h-40 bg-slate-200 dark:bg-slate-700 rounded-3xl"></div>
-                    <div class="w-full h-40 bg-slate-200 dark:bg-slate-700 rounded-3xl"></div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div class="fixed top-[-10%] left-[-10%] w-96 h-96 bg-indigo-500/20 dark:bg-indigo-600/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="fixed bottom-[-10%] right-[-10%] w-96 h-96 bg-emerald-500/20 dark:bg-emerald-600/10 rounded-full blur-3xl pointer-events-none"></div>
 
-    <header class="bg-white/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50 shadow-sm backdrop-blur-lg transition-colors duration-300">
+    <header class="bg-white/70 dark:bg-slate-900/70 border-b border-slate-200/50 dark:border-slate-800/50 sticky top-0 z-50 shadow-sm backdrop-blur-xl transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
             
             <div class="flex items-center space-x-3 w-full md:w-auto justify-between md:justify-start">
                 <div class="flex items-center space-x-3">
-                    <div class="bg-gradient-to-tr from-indigo-600 to-violet-500 text-white p-2.5 rounded-xl shadow-lg shadow-indigo-200 dark:shadow-none">
+                    <div class="bg-gradient-to-br from-indigo-500 to-violet-600 text-white p-2.5 rounded-2xl shadow-lg shadow-indigo-500/30">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                     </div>
                     <div>
-                        <h1 class="text-xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center">
-                            Scheduly <span class="text-[10px] font-bold px-2 py-0.5 bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 rounded-full ml-2 uppercase tracking-wider">Pro</span>
+                        <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center">
+                            Scheduly <span class="text-[10px] font-bold px-2 py-0.5 bg-gradient-to-r from-indigo-500 to-violet-500 text-white rounded-full ml-2 uppercase tracking-wider shadow-sm">Pro</span>
                         </h1>
-                        <span id="current-time" class="block text-xs text-indigo-600 dark:text-indigo-400 font-bold"></span>
+                        <span id="current-time" class="block text-xs text-slate-500 dark:text-slate-400 font-medium"></span>
                     </div>
                 </div>
                 
                 <div class="flex items-center space-x-2">
-                    <button id="noti-btn" onclick="requestNotificationPermission()" class="p-2.5 bg-amber-50 dark:bg-amber-950/40 text-amber-600 rounded-xl hidden" title="Aktifkan Alarm Pengingat">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+                    <button id="noti-btn" onclick="requestNotificationPermission()" class="p-2.5 bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 rounded-xl hidden hover:bg-amber-200 transition-colors" title="Aktifkan Alarm">
+                        <svg class="w-5 h-5 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
                     </button>
-                    <button onclick="manageData()" class="p-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" title="Backup & Restore Data">
+                    <button onclick="manageData()" class="p-2.5 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors shadow-sm border border-slate-200/50 dark:border-slate-700/50" title="Backup & Restore Data">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
                     </button>
-                    <button onclick="toggleTheme()" class="p-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
-                        <svg id="theme-icon-sun" class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                        <svg id="theme-icon-moon" class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                    <button onclick="toggleTheme()" class="p-2.5 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors shadow-sm border border-slate-200/50 dark:border-slate-700/50">
+                        <svg id="theme-icon-sun" class="w-5 h-5 hidden dark:block text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                        <svg id="theme-icon-moon" class="w-5 h-5 block dark:hidden text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
                     </button>
                 </div>
             </div>
 
             <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
-                <div class="bg-slate-100 dark:bg-slate-800 p-1 rounded-xl flex w-full sm:w-auto">
-                    <button id="btn-view-timeline" onclick="switchMainView('timeline')" class="flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-white dark:bg-slate-700 shadow-sm text-indigo-600 dark:text-white">Timeline</button>
-                    <button id="btn-view-calendar" onclick="switchMainView('calendar')" class="flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500 dark:text-slate-400">Kalender Bulanan</button>
+                <div class="bg-slate-100/80 dark:bg-slate-800/80 p-1 rounded-xl flex w-full sm:w-auto shadow-inner border border-slate-200/50 dark:border-slate-700/50">
+                    <button id="btn-view-timeline" onclick="switchMainView('timeline')" class="flex-1 sm:flex-none px-5 py-2 rounded-lg text-sm font-bold transition-all bg-white dark:bg-slate-700 shadow-sm text-indigo-600 dark:text-white">Timeline</button>
+                    <button id="btn-view-calendar" onclick="switchMainView('calendar')" class="flex-1 sm:flex-none px-5 py-2 rounded-lg text-sm font-bold transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">Kalender</button>
                 </div>
 
-                <div class="relative w-full sm:w-48" id="search-wrapper">
-                    <input type="text" id="search-input" placeholder="Cari jadwal..." class="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white">
-                    <svg class="w-4 h-4 absolute left-3 top-2.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                <div class="relative w-full sm:w-56" id="search-wrapper">
+                    <input type="text" id="search-input" placeholder="Cari jadwal..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200/50 dark:border-slate-700/50 bg-white/50 dark:bg-slate-800/50 backdrop-blur-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white transition-all shadow-sm">
+                    <svg class="w-4 h-4 absolute left-3.5 top-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
                 
-                <select id="view-selector" class="w-full sm:w-auto px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
-                    <option value="7">7 Hari</option>
-                    <option value="14">14 Hari</option>
-                    <option value="30">30 Hari</option>
+                <select id="view-selector" class="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-slate-200/50 dark:border-slate-700/50 bg-white/50 dark:bg-slate-800/50 backdrop-blur-md text-sm font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer shadow-sm">
+                    <option value="7">7 Hari Depan</option>
+                    <option value="14">14 Hari Depan</option>
+                    <option value="30">30 Hari Depan</option>
                 </select>
             </div>
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10">
         
         <div class="lg:col-span-1">
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/40 dark:shadow-none sticky top-28 transition-colors duration-300">
-                <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-5 flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                    Tambah Jadwal
+            <div class="bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl p-6 rounded-3xl border border-slate-200/50 dark:border-slate-700/50 shadow-xl shadow-slate-200/40 dark:shadow-none sticky top-28 transition-colors duration-300">
+                <h2 class="text-xl font-extrabold text-slate-900 dark:text-white mb-6 flex items-center">
+                    <span class="bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 p-2 rounded-xl mr-3">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                    </span>
+                    Jadwal Baru
                 </h2>
-                <form id="schedule-form" class="space-y-4">
+                <form id="schedule-form" class="space-y-4.5">
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Nama Kegiatan</label>
-                        <input type="text" id="event-title" required class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm" placeholder="Contoh: Run Synchronize Data">
+                        <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Nama Kegiatan</label>
+                        <input type="text" id="event-title" required class="w-full px-4 py-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all" placeholder="Contoh: Meeting Project X">
                     </div>
                     
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Pilih Tanggal</label>
-                            <select id="event-date" required class="w-full px-3 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm"></select>
+                            <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Tanggal</label>
+                            <select id="event-date" required class="w-full px-4 py-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm transition-all"></select>
                         </div>
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Label Kategori</label>
-                            <select id="event-category" required class="w-full px-3 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm">
-                                <option value="kerja">Kerja</option>
-                                <option value="belajar">Belajar</option>
-                                <option value="santai">Santai</option>
-                                <option value="penting">Penting</option>
+                            <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Kategori</label>
+                            <select id="event-category" required class="w-full px-4 py-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm transition-all">
+                                <option value="kerja">💼 Kerja</option>
+                                <option value="belajar">📚 Belajar</option>
+                                <option value="santai">☕ Santai</option>
+                                <option value="penting">🔥 Penting</option>
                             </select>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-3 gap-3">
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Jam Mulai</label>
-                            <input type="time" id="event-time" required class="w-full px-2 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm">
+                            <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Mulai</label>
+                            <input type="time" id="event-time" required class="w-full px-3 py-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm transition-all">
                         </div>
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Durasi (Mnt)</label>
-                            <input type="number" id="event-duration" min="5" value="60" required class="w-full px-2 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm">
+                            <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Durasi (Mnt)</label>
+                            <input type="number" id="event-duration" min="5" value="60" required class="w-full px-3 py-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm transition-all">
                         </div>
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Perulangan</label>
-                            <select id="event-recurrence" class="w-full px-1 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 dark:text-white focus:ring-2 focus:ring-indigo-500 text-xs font-semibold">
+                            <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Ulang</label>
+                            <select id="event-recurrence" class="w-full px-2 py-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 dark:text-white focus:ring-2 focus:ring-indigo-500 text-xs font-semibold transition-all">
                                 <option value="none">Sekali</option>
                                 <option value="daily">Tiap Hari</option>
-                                <option value="weekly">Tiap Minggu</option>
+                                <option value="weekly">Mingguan</option>
                             </select>
                         </div>
                     </div>
 
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Catatan (Opsional)</label>
-                        <textarea id="event-desc" rows="2" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm resize-none" placeholder="Detail deskripsi kegiatan..."></textarea>
+                    <div class="pt-2">
+                        <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Catatan (Opsional)</label>
+                        <textarea id="event-desc" rows="2" class="w-full px-4 py-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm resize-none transition-all" placeholder="Detail kegiatan atau link meeting..."></textarea>
                     </div>
 
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-xl shadow-lg shadow-indigo-200 dark:shadow-none transition-all text-sm mt-4 flex justify-center items-center">
-                        <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>
-                        Simpan Jadwal
+                    <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold py-4 px-4 rounded-2xl shadow-lg shadow-indigo-500/30 transform hover:-translate-y-1 transition-all duration-200 text-sm mt-4 flex justify-center items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                        Simpan Jadwal Baru
                     </button>
                 </form>
             </div>
         </div>
 
         <div class="lg:col-span-2 space-y-6">
+            
+            <div id="dashboard-stats" class="grid grid-cols-3 gap-4 fade-in hidden">
+                <div class="bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl p-5 rounded-3xl border border-slate-200/50 dark:border-slate-700/50 shadow-sm flex flex-col justify-center items-center">
+                    <span class="text-3xl font-extrabold text-indigo-600 dark:text-indigo-400" id="stat-total">0</span>
+                    <span class="text-[10px] uppercase tracking-wider font-bold text-slate-500 mt-1">Total Hari Ini</span>
+                </div>
+                <div class="bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl p-5 rounded-3xl border border-slate-200/50 dark:border-slate-700/50 shadow-sm flex flex-col justify-center items-center">
+                    <span class="text-3xl font-extrabold text-emerald-500" id="stat-done">0</span>
+                    <span class="text-[10px] uppercase tracking-wider font-bold text-slate-500 mt-1">Selesai</span>
+                </div>
+                <div class="bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl p-5 rounded-3xl border border-slate-200/50 dark:border-slate-700/50 shadow-sm flex flex-col justify-center items-center">
+                    <span class="text-3xl font-extrabold text-amber-500" id="stat-pending">0</span>
+                    <span class="text-[10px] uppercase tracking-wider font-bold text-slate-500 mt-1">Belum</span>
+                </div>
+            </div>
+
             <div id="timeline-container" class="space-y-6"></div>
 
-            <div id="calendar-view-container" class="hidden fade-in bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
+            <div id="calendar-view-container" class="hidden fade-in bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl p-6 rounded-3xl border border-slate-200/50 dark:border-slate-700/50 shadow-sm">
                 <div class="flex justify-between items-center mb-6">
-                    <h3 id="calendar-month-year" class="text-lg font-bold text-slate-900 dark:text-white"></h3>
+                    <h3 id="calendar-month-year" class="text-xl font-extrabold text-slate-900 dark:text-white"></h3>
                     <div class="flex space-x-2">
-                        <button onclick="changeMonth(-1)" class="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 text-slate-600 dark:text-slate-300">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                        <button onclick="changeMonth(-1)" class="p-2.5 bg-slate-100 dark:bg-slate-700/50 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 transition-colors">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
                         </button>
-                        <button onclick="changeMonth(1)" class="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 text-slate-600 dark:text-slate-300">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                        <button onclick="changeMonth(1)" class="p-2.5 bg-slate-100 dark:bg-slate-700/50 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 transition-colors">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                         </button>
                     </div>
                 </div>
-                <div class="grid grid-cols-7 gap-2 text-center text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                <div class="grid grid-cols-7 gap-2 text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">
                     <div>Min</div><div>Sen</div><div>Sel</div><div>Rab</div><div>Kam</div><div>Jum</div><div>Sab</div>
                 </div>
                 <div id="calendar-days-grid" class="grid grid-cols-7 gap-2"></div>
@@ -201,11 +206,11 @@
 
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').catch(err => console.log(err));
-        }
-
+        // INIT DATA
         let events = JSON.parse(localStorage.getItem('scheduly_events')) || [];
+        // Support migrasi data lama yang belum punya properti 'completed'
+        events = events.map(e => ({ ...e, completed: e.completed || false }));
+
         let currentDays = 7;
         let searchQuery = '';
         let generatedDays = [];
@@ -214,34 +219,18 @@
         let activeFilterDate = null;
         let notifiedEvents = JSON.parse(localStorage.getItem('scheduly_notified')) || [];
 
-        // SVG Icons digabung ke dalam object Category
-        const svgIcons = {
-            kerja: `<svg class="w-3.5 h-3.5 mr-1 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>`,
-            belajar: `<svg class="w-3.5 h-3.5 mr-1 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" /></svg>`,
-            santai: `<svg class="w-3.5 h-3.5 mr-1 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`,
-            penting: `<svg class="w-3.5 h-3.5 mr-1 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>`
-        };
-
         const categories = {
-            kerja: { label: 'Kerja', svg: svgIcons.kerja, bg: 'bg-indigo-50 dark:bg-indigo-500/10', text: 'text-indigo-700 dark:text-indigo-300', border: 'border-l-4 border-l-indigo-500', dot: 'bg-indigo-500' },
-            belajar: { label: 'Belajar', svg: svgIcons.belajar, bg: 'bg-emerald-50 dark:bg-emerald-500/10', text: 'text-emerald-700 dark:text-emerald-300', border: 'border-l-4 border-l-emerald-500', dot: 'bg-emerald-500' },
-            santai: { label: 'Santai', svg: svgIcons.santai, bg: 'bg-amber-50 dark:bg-amber-500/10', text: 'text-amber-700 dark:text-amber-300', border: 'border-l-4 border-l-amber-500', dot: 'bg-amber-500' },
-            penting: { label: 'Penting', svg: svgIcons.penting, bg: 'bg-rose-50 dark:bg-rose-500/10', text: 'text-rose-700 dark:text-rose-300', border: 'border-l-4 border-l-rose-500', dot: 'bg-rose-500' }
+            kerja: { label: 'Kerja', bg: 'bg-indigo-100 dark:bg-indigo-500/20', text: 'text-indigo-700 dark:text-indigo-300', border: 'border-l-4 border-l-indigo-500', dot: 'bg-indigo-500' },
+            belajar: { label: 'Belajar', bg: 'bg-emerald-100 dark:bg-emerald-500/20', text: 'text-emerald-700 dark:text-emerald-300', border: 'border-l-4 border-l-emerald-500', dot: 'bg-emerald-500' },
+            santai: { label: 'Santai', bg: 'bg-sky-100 dark:bg-sky-500/20', text: 'text-sky-700 dark:text-sky-300', border: 'border-l-4 border-l-sky-500', dot: 'bg-sky-500' },
+            penting: { label: 'Penting', bg: 'bg-rose-100 dark:bg-rose-500/20', text: 'text-rose-700 dark:text-rose-300', border: 'border-l-4 border-l-rose-500', dot: 'bg-rose-500' }
         };
 
-        window.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                const skeleton = document.getElementById('skeleton-screen');
-                skeleton.className = "fixed inset-0 z-[100] bg-slate-50 dark:bg-slate-900 p-6 space-y-6 transition-all duration-500 opacity-0 pointer-events-none";
-                checkNotificationState();
-            }, 1200);
-        });
+        window.addEventListener('DOMContentLoaded', () => { checkNotificationState(); });
 
         function checkNotificationState() {
             const notiBtn = document.getElementById('noti-btn');
-            if ('Notification' in window && Notification.permission === 'default') {
-                notiBtn.classList.remove('hidden');
-            }
+            if ('Notification' in window && Notification.permission === 'default') notiBtn.classList.remove('hidden');
         }
 
         function requestNotificationPermission() {
@@ -255,33 +244,6 @@
             }
         }
 
-        function checkUpcomingReminders() {
-            if (!('Notification' in window) || Notification.permission !== 'granted') return;
-            const now = new Date();
-            events.forEach(e => {
-                const isTodayEvent = e.date === now.toISOString().split('T')[0];
-                let shouldCheck = isTodayEvent;
-                if (e.recurrence === 'daily') shouldCheck = true;
-                if (e.recurrence === 'weekly') shouldCheck = new Date(e.date).getDay() === now.getDay();
-
-                if (shouldCheck) {
-                    const [eHours, eMinutes] = e.time.split(':');
-                    const eventTimeToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), eHours, eMinutes);
-                    const diffMinutes = (eventTimeToday - now) / 60000;
-                    const notiKey = `${e.id}_${now.toISOString().split('T')[0]}`;
-
-                    if (diffMinutes > 0 && diffMinutes <= 15 && !notifiedEvents.includes(notiKey)) {
-                        new Notification(`Pengingat: Scheduly Pro`, {
-                            body: `Acara "${e.title}" akan dimulai dalam ${Math.round(diffMinutes)} menit lagi!`
-                        });
-                        notifiedEvents.push(notiKey);
-                        localStorage.setItem('scheduly_notified', JSON.stringify(notifiedEvents));
-                    }
-                }
-            });
-        }
-        setInterval(checkUpcomingReminders, 30000);
-
         function switchMainView(view) {
             activeView = view;
             const tBtn = document.getElementById('btn-view-timeline');
@@ -290,23 +252,26 @@
             const cContainer = document.getElementById('calendar-view-container');
             const searchW = document.getElementById('search-wrapper');
             const viewS = document.getElementById('view-selector');
+            const dashboard = document.getElementById('dashboard-stats');
 
             if (view === 'timeline') {
                 activeFilterDate = null;
-                tBtn.className = "flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-white dark:bg-slate-700 shadow-sm text-indigo-600 dark:text-white";
-                cBtn.className = "flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500 dark:text-slate-400";
+                tBtn.className = "flex-1 sm:flex-none px-5 py-2 rounded-lg text-sm font-bold transition-all bg-white dark:bg-slate-700 shadow-sm text-indigo-600 dark:text-white";
+                cBtn.className = "flex-1 sm:flex-none px-5 py-2 rounded-lg text-sm font-bold transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200";
                 tContainer.classList.remove('hidden');
                 cContainer.classList.add('hidden');
                 searchW.classList.remove('hidden');
                 viewS.classList.remove('hidden');
+                dashboard.classList.remove('hidden');
                 renderTimeline();
             } else {
-                tBtn.className = "flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500 dark:text-slate-400";
-                cBtn.className = "flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-white dark:bg-slate-700 shadow-sm text-indigo-600 dark:text-white";
+                tBtn.className = "flex-1 sm:flex-none px-5 py-2 rounded-lg text-sm font-bold transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200";
+                cBtn.className = "flex-1 sm:flex-none px-5 py-2 rounded-lg text-sm font-bold transition-all bg-white dark:bg-slate-700 shadow-sm text-indigo-600 dark:text-white";
                 tContainer.classList.add('hidden');
                 cContainer.classList.remove('hidden');
                 searchW.classList.add('hidden');
                 viewS.classList.add('hidden');
+                dashboard.classList.add('hidden');
                 renderMonthlyCalendar();
             }
         }
@@ -320,18 +285,13 @@
             const monthYearText = document.getElementById('calendar-month-year');
             const daysGrid = document.getElementById('calendar-days-grid');
             daysGrid.innerHTML = '';
-
             const year = calendarDate.getFullYear();
             const month = calendarDate.getMonth();
-
             monthYearText.textContent = calendarDate.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
-
             const firstDayIndex = new Date(year, month, 1).getDay();
             const totalDays = new Date(year, month + 1, 0).getDate();
 
-            for (let i = 0; i < firstDayIndex; i++) {
-                daysGrid.appendChild(document.createElement('div'));
-            }
+            for (let i = 0; i < firstDayIndex; i++) daysGrid.appendChild(document.createElement('div'));
 
             const todayStr = new Date().toISOString().split('T')[0];
 
@@ -341,7 +301,7 @@
                 const dateString = (new Date(currentLoopDate.getTime() - offset)).toISOString().split('T')[0];
 
                 const dayCell = document.createElement('button');
-                dayCell.className = `p-3 rounded-2xl border border-slate-100 dark:border-slate-700/60 flex flex-col items-center justify-between min-h-[64px] transition-all hover:bg-indigo-50 dark:hover:bg-indigo-500/20 ${dateString === todayStr ? 'ring-2 ring-indigo-500 font-extrabold' : ''}`;
+                dayCell.className = `p-3 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 flex flex-col items-center justify-between min-h-[72px] transition-all hover:bg-indigo-50 dark:hover:bg-indigo-500/20 hover:scale-105 ${dateString === todayStr ? 'bg-indigo-50 dark:bg-indigo-900/30 ring-2 ring-indigo-500 font-extrabold' : 'bg-white/50 dark:bg-slate-800/50'}`;
                 dayCell.innerHTML = `<span class="text-sm dark:text-slate-200">${day}</span>`;
 
                 const dayEvents = events.filter(e => {
@@ -355,11 +315,11 @@
 
                 if (dayEvents.length > 0) {
                     const dotsWrapper = document.createElement('div');
-                    dotsWrapper.className = "flex gap-1 flex-wrap justify-center mt-1";
+                    dotsWrapper.className = "flex gap-1 flex-wrap justify-center mt-2";
                     const uniqueCats = [...new Set(dayEvents.map(e => e.category || 'kerja'))].slice(0, 3);
                     uniqueCats.forEach(c => {
                         const dot = document.createElement('span');
-                        dot.className = `w-1.5 h-1.5 rounded-full ${categories[c].dot}`;
+                        dot.className = `w-1.5 h-1.5 rounded-full ${categories[c].dot} shadow-sm`;
                         dotsWrapper.appendChild(dot);
                     });
                     dayCell.appendChild(dotsWrapper);
@@ -382,9 +342,7 @@
         const initTheme = () => {
             if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
+            } else { document.documentElement.classList.remove('dark'); }
         };
         
         const toggleTheme = () => {
@@ -397,68 +355,48 @@
         const showToast = (msg, type = 'success') => {
             Toastify({
                 text: msg, duration: 3000, gravity: "bottom", position: "right", 
-                style: { background: type === 'success' ? "#10B981" : "#EF4444", borderRadius: "10px", fontSize: "14px" }
+                style: { background: type === 'success' ? "#4f46e5" : "#EF4444", borderRadius: "12px", fontSize: "14px", fontWeight: "600", boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)" }
             }).showToast();
         };
 
-        // --- NEW FEATURE: BACKUP & RESTORE JSON ---
         window.manageData = () => {
             const isDark = document.documentElement.classList.contains('dark');
             Swal.fire({
                 title: 'Manajemen Data',
                 html: `
-                    <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Backup seluruh jadwalmu atau pulihkan dari file sebelumnya.</p>
-                    <div class="space-y-3">
-                        <button id="btn-export" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-xl transition-all flex justify-center items-center">
+                    <div class="space-y-3 mt-4">
+                        <button id="btn-export" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-2xl transition-all flex justify-center items-center">
                             <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                             Download Backup (JSON)
                         </button>
                         <div class="relative">
                             <input type="file" id="file-import" accept=".json" class="hidden" />
-                            <button id="btn-import" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-3 rounded-xl transition-all flex justify-center items-center">
+                            <button id="btn-import" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-3.5 rounded-2xl transition-all flex justify-center items-center">
                                 <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
                                 Upload Data (JSON)
                             </button>
                         </div>
                     </div>
                 `,
-                showConfirmButton: false,
-                showCloseButton: true,
-                background: isDark ? '#1e293b' : '#ffffff',
-                color: isDark ? '#ffffff' : '#0f172a',
+                showConfirmButton: false, showCloseButton: true,
+                background: isDark ? '#1e293b' : '#ffffff', color: isDark ? '#ffffff' : '#0f172a',
                 didOpen: () => {
                     document.getElementById('btn-export').onclick = () => {
                         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(events));
-                        const dlAnchor = document.createElement('a');
-                        dlAnchor.setAttribute("href", dataStr);
-                        dlAnchor.setAttribute("download", "scheduly_backup_" + new Date().toISOString().split('T')[0] + ".json");
-                        document.body.appendChild(dlAnchor);
-                        dlAnchor.click();
-                        dlAnchor.remove();
-                        showToast("File backup berhasil diunduh");
+                        const dlAnchor = document.createElement('a'); dlAnchor.href = dataStr; dlAnchor.download = "scheduly_backup.json";
+                        document.body.appendChild(dlAnchor); dlAnchor.click(); dlAnchor.remove(); showToast("File backup diunduh!");
                     };
-                    
                     document.getElementById('btn-import').onclick = () => document.getElementById('file-import').click();
-                    
                     document.getElementById('file-import').onchange = (e) => {
-                        const file = e.target.files[0];
-                        if (!file) return;
+                        const file = e.target.files[0]; if (!file) return;
                         const reader = new FileReader();
                         reader.onload = (event) => {
                             try {
-                                const importedEvents = JSON.parse(event.target.result);
-                                if (Array.isArray(importedEvents)) {
-                                    events = importedEvents;
-                                    localStorage.setItem('scheduly_events', JSON.stringify(events));
-                                    if(activeView === 'calendar') renderMonthlyCalendar(); else renderTimeline();
-                                    Swal.close();
-                                    showToast("Data berhasil dipulihkan!");
-                                }
-                            } catch (err) {
-                                showToast("Format file tidak valid!", "error");
-                            }
-                        };
-                        reader.readAsText(file);
+                                events = JSON.parse(event.target.result).map(e => ({...e, completed: e.completed || false}));
+                                localStorage.setItem('scheduly_events', JSON.stringify(events));
+                                renderTimeline(); Swal.close(); showToast("Data dipulihkan!");
+                            } catch (err) { showToast("Format file invalid!", "error"); }
+                        }; reader.readAsText(file);
                     };
                 }
             });
@@ -468,244 +406,160 @@
             const days = [];
             const options = { weekday: 'long', day: 'numeric', month: 'long' };
             for (let i = 0; i < daysCount; i++) {
-                const date = new Date();
-                date.setDate(date.getDate() + i);
+                const date = new Date(); date.setDate(date.getDate() + i);
                 const offset = date.getTimezoneOffset() * 60000;
-                const dateString = (new Date(date.getTime() - offset)).toISOString().split('T')[0];
-                const label = date.toLocaleDateString('id-ID', options);
-                days.push({ dateString, label, isToday: i === 0 });
+                days.push({ dateString: (new Date(date.getTime() - offset)).toISOString().split('T')[0], label: date.toLocaleDateString('id-ID', options), isToday: i === 0 });
             }
             return days;
         };
 
         const populateDateDropdown = () => {
             const select = document.getElementById('event-date');
-            const dropdownDays = generateDaysArray(30);
             select.innerHTML = '';
-            dropdownDays.forEach(day => {
+            generateDaysArray(30).forEach(day => {
                 const option = document.createElement('option');
-                option.value = day.dateString;
-                option.textContent = day.isToday ? `Hari Ini - ${day.label}` : day.label;
+                option.value = day.dateString; option.textContent = day.isToday ? `Hari Ini - ${day.label}` : day.label;
                 select.appendChild(option);
             });
         };
 
-        window.shareEvent = async (id, dayLabel) => {
-            const event = events.find(e => e.id === id);
-            if (!event) return;
-            const catLabel = categories[event.category || 'kerja'].label;
-            const textMessage = `Jadwal Scheduly: *${event.title}* [${catLabel}]\nHari: ${dayLabel}\nJam: ${event.time} (${event.duration} Mnt)\nCatatan: ${event.description || '-'}`;
-            
-            if (navigator.share) {
-                try { await navigator.share({ title: event.title, text: textMessage }); } catch (err) {}
-            } else {
-                navigator.clipboard.writeText(textMessage);
-                showToast("Teks disalin ke clipboard!", "success");
+        // NEW: Toggle Complete Status
+        window.toggleComplete = (id) => {
+            const ev = events.find(e => e.id === id);
+            if(ev) {
+                ev.completed = !ev.completed;
+                localStorage.setItem('scheduly_events', JSON.stringify(events));
+                renderTimeline();
+                if(ev.completed) showToast("Jadwal Selesai! 🎉");
             }
         };
 
-        // Format Date for ICS & GCal
-        const formatDateString = (dateObj) => dateObj.toISOString().replace(/-|:|\.\d\d\d/g, "");
-
-        // --- NEW FEATURE: GOOGLE CALENDAR SYNC ---
-        window.addToGoogleCalendar = (id) => {
-            const event = events.find(e => e.id === id);
-            if (!event) return;
-
-            const [year, month, day] = event.date.split('-');
-            const [hours, minutes] = event.time.split(':');
-            
-            // Konversi ke UTC agar Google Calendar membacanya dengan akurat
-            const startDate = new Date(year, month - 1, day, hours, minutes);
-            const endDate = new Date(startDate.getTime() + event.duration * 60000);
-
-            const title = encodeURIComponent(event.title);
-            const details = encodeURIComponent(event.description || 'Dibuat melalui Scheduly Pro');
-            const dates = `${formatDateString(startDate)}/${formatDateString(endDate)}`;
-
-            const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}`;
-            window.open(gcalUrl, '_blank');
+        window.confirmDelete = (id) => {
+            events = events.filter(e => e.id !== id);
+            localStorage.setItem('scheduly_events', JSON.stringify(events));
+            renderTimeline(); showToast("Jadwal dihapus", "error");
         };
 
-        window.generateTrueICS = (id) => {
-            const event = events.find(e => e.id === id);
-            if (!event) return;
-
-            const [year, month, day] = event.date.split('-');
-            const [hours, minutes] = event.time.split(':');
-            const startDate = new Date(year, month - 1, day, hours, minutes);
-            const endDate = new Date(startDate.getTime() + event.duration * 60000);
-            
-            const icsContent = [
-                "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Scheduly App//ID", "BEGIN:VEVENT",
-                `UID:${event.id}@scheduly`, `DTSTAMP:${formatDateString(new Date())}`,
-                `DTSTART:${formatDateString(startDate)}`, `DTEND:${formatDateString(endDate)}`,
-                `SUMMARY:${event.title}`, `DESCRIPTION:${event.description || ''}`,
-                "END:VEVENT", "END:VCALENDAR"
-            ].join("\n");
-
-            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-            const link = document.createElement('a');
-            link.href = window.URL.createObjectURL(blob);
-            link.setAttribute('download', `${event.title.replace(/\s+/g, '_')}.ics`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+        const updateDashboardStats = (todayEvents) => {
+            if(activeFilterDate || searchQuery) return; // Hanya hitung hari ini
+            const total = todayEvents.length;
+            const done = todayEvents.filter(e => e.completed).length;
+            document.getElementById('stat-total').textContent = total;
+            document.getElementById('stat-done').textContent = done;
+            document.getElementById('stat-pending').textContent = total - done;
         };
 
         const renderTimeline = () => {
             const container = document.getElementById('timeline-container');
             container.innerHTML = '';
+            
+            let todayEventsCount = [];
 
             generatedDays.forEach(day => {
                 const dayEvents = events.filter(e => {
-                    const matchesSearch = e.title.toLowerCase().includes(searchQuery) || e.description.toLowerCase().includes(searchQuery);
+                    const matchesSearch = e.title.toLowerCase().includes(searchQuery) || (e.description && e.description.toLowerCase().includes(searchQuery));
                     if (!matchesSearch) return false;
                     if (e.date === day.dateString) return true;
                     if (e.date > day.dateString) return false;
                     if (e.recurrence === 'daily') return true;
                     if (e.recurrence === 'weekly') return new Date(e.date).getDay() === new Date(day.dateString).getDay();
                     return false;
-                }).sort((a, b) => a.time.localeCompare(b.time));
+                }).sort((a, b) => a.time.localeCompare(b.time)); // AUTO SORT WAKTU!
 
+                if(day.isToday) todayEventsCount = dayEvents;
                 if (searchQuery !== '' && dayEvents.length === 0) return;
 
-                let densityIndicator = '';
-                if (dayEvents.length === 0) densityIndicator = `<span class="w-2.5 h-2.5 rounded-full bg-slate-200 dark:bg-slate-700"></span>`;
-                else if (dayEvents.length <= 2) densityIndicator = `<span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]"></span>`;
-                else densityIndicator = `<span class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)] animate-pulse"></span>`;
+                let densityIndicator = dayEvents.length === 0 ? `<span class="w-2.5 h-2.5 rounded-full bg-slate-200 dark:bg-slate-700"></span>` : 
+                                     dayEvents.length <= 2 ? `<span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]"></span>` : 
+                                     `<span class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)] animate-pulse"></span>`;
 
                 const daySection = document.createElement('div');
-                daySection.className = `fade-in bg-white dark:bg-slate-800 rounded-3xl border ${day.isToday ? 'border-indigo-200 dark:border-indigo-500/30 ring-4 ring-indigo-500/10' : 'border-slate-200 dark:border-slate-700'} p-6 sm:p-8 shadow-sm`;
+                daySection.className = `fade-in bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl rounded-3xl border ${day.isToday ? 'border-indigo-300 dark:border-indigo-500/50 ring-4 ring-indigo-500/10 shadow-lg shadow-indigo-500/5' : 'border-slate-200/50 dark:border-slate-700/50 shadow-sm'} p-6 sm:p-8 transition-all`;
                 
-                let eventsHTML = '';
-                if (dayEvents.length === 0) {
-                    eventsHTML = `
-                        <div class="flex flex-col items-center justify-center py-6">
-                            <lottie-player src="https://lottie.host/e7ed7be7-8328-4be6-a4c3-1fb8efb36ebc/JvQW1a7L0J.json" background="transparent" speed="1" style="width: 100px; height: 100px;" loop autoplay opacity="0.5"></lottie-player>
-                            <p class="text-xs text-slate-400 dark:text-slate-500 font-medium mt-2">Belum ada agenda</p>
-                        </div>`;
-                } else {
-                    dayEvents.forEach(e => {
+                let eventsHTML = dayEvents.length === 0 ? `
+                    <div class="flex flex-col items-center justify-center py-6 opacity-60">
+                        <lottie-player src="https://lottie.host/e7ed7be7-8328-4be6-a4c3-1fb8efb36ebc/JvQW1a7L0J.json" background="transparent" speed="1" style="width: 100px; height: 100px;" loop autoplay></lottie-player>
+                        <p class="text-sm text-slate-400 font-medium mt-2">Belum ada agenda</p>
+                    </div>` : dayEvents.map(e => {
                         const cat = categories[e.category || 'kerja'];
-                        const svgRecur = `<svg class="w-3 h-3 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>`;
-                        const recurBadge = e.recurrence && e.recurrence !== 'none' ? `<span class="text-[9px] font-extrabold px-1.5 py-0.5 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded">${svgRecur}${e.recurrence}</span>` : '';
-
-                        eventsHTML += `
-                            <div class="flex items-start justify-between p-4 bg-slate-50/50 dark:bg-slate-700/30 rounded-2xl border border-slate-100 dark:border-slate-700/50 ${cat.border} hover:bg-white dark:hover:bg-slate-800 hover:shadow-md transition-all duration-300 group mb-3 last:mb-0">
-                                <div class="space-y-1.5 w-full pr-4">
-                                    <div class="flex flex-wrap items-center gap-2">
-                                        <span class="text-xs font-bold px-2.5 py-1 bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 rounded-lg">${e.time}</span>
-                                        <span class="text-[10px] font-bold px-2 py-0.5 ${cat.bg} ${cat.text} rounded-md">${cat.svg}${cat.label}</span>
-                                        ${recurBadge}
+                        const isDone = e.completed;
+                        
+                        return `
+                        <div class="flex items-start p-4 bg-white dark:bg-slate-900/40 rounded-2xl border border-slate-100 dark:border-slate-700/50 ${cat.border} shadow-sm hover:shadow-md transition-all duration-300 group mb-3 last:mb-0 relative overflow-hidden">
+                            
+                            <div class="pt-1 pr-4 relative z-10">
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" class="hidden checkbox-custom" ${isDone ? 'checked' : ''} onchange="toggleComplete('${e.id}')">
+                                    <div class="w-6 h-6 rounded-lg border-2 border-slate-300 dark:border-slate-600 flex items-center justify-center transition-all bg-white dark:bg-slate-800 hover:border-indigo-500">
+                                        <svg class="w-4 h-4 text-white hidden pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                                     </div>
-                                    <h4 class="text-sm font-bold text-slate-900 dark:text-white pt-1">${e.title}</h4>
-                                    ${e.description ? `<p class="text-xs text-slate-500 dark:text-slate-400 pl-1 border-l-2 border-slate-200 dark:border-slate-600 ml-1.5 mt-2 py-0.5">${e.description}</p>` : ''}
-                                </div>
-                                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-all duration-300">
-                                    <button onclick="shareEvent('${e.id}', '${day.label}')" title="Bagikan" class="p-2 text-emerald-500 dark:text-emerald-400 hover:text-white hover:bg-emerald-500 rounded-xl transition-colors bg-emerald-50 dark:bg-emerald-500/10">
-                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 10.742l4.135-4.135m0 7.786l-4.135-4.135m5.922-3.65a2.5 2.5 0 11-3.536-3.536 2.5 2.5 0 013.536 3.536zm0 12.284a2.5 2.5 0 11-3.536-3.536 2.5 2.5 0 013.536 3.536zM3.464 12a2.5 2.5 0 115 0 2.5 2.5 0 01-5 0z" /></svg>
-                                    </button>
-                                    <button onclick="addToGoogleCalendar('${e.id}')" title="Google Calendar" class="p-2 text-amber-500 dark:text-amber-400 hover:text-white hover:bg-amber-500 rounded-xl transition-colors bg-amber-50 dark:bg-amber-500/10">
-                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                                    </button>
-                                    <button onclick="generateTrueICS('${e.id}')" title="Unduh .ICS" class="p-2 text-indigo-500 dark:text-indigo-400 hover:text-white hover:bg-indigo-500 rounded-xl transition-colors bg-indigo-50 dark:bg-indigo-500/10">
-                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                                    </button>
-                                    <button onclick="confirmDelete('${e.id}')" title="Hapus" class="p-2 text-rose-500 dark:text-rose-400 hover:text-white hover:bg-rose-500 rounded-xl transition-colors bg-rose-50 dark:bg-rose-500/10">
-                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                    </button>
-                                </div>
+                                </label>
                             </div>
-                        `;
-                    });
-                }
+
+                            <div class="space-y-1.5 w-full pr-4 relative z-10 opacity-${isDone ? '50' : '100'} transition-opacity">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="text-xs font-bold px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg">${e.time}</span>
+                                    <span class="text-[10px] font-bold px-2.5 py-1 ${cat.bg} ${cat.text} rounded-lg">${cat.label}</span>
+                                </div>
+                                <h4 class="text-base font-bold text-slate-900 dark:text-white pt-1 ${isDone ? 'line-through decoration-2 decoration-slate-400' : ''}">${e.title}</h4>
+                                ${e.description ? `<p class="text-xs text-slate-500 dark:text-slate-400 pl-2 border-l-2 border-slate-200 dark:border-slate-600 ml-1 mt-2 py-0.5 line-clamp-2">${e.description}</p>` : ''}
+                            </div>
+                            
+                            <div class="flex flex-col space-y-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity absolute right-4 top-4 z-20">
+                                <button onclick="confirmDelete('${e.id}')" title="Hapus" class="p-2 text-rose-500 hover:text-white hover:bg-rose-500 rounded-xl transition-colors bg-rose-50 dark:bg-rose-500/10 shadow-sm">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                </button>
+                            </div>
+
+                            ${isDone ? '<div class="absolute inset-0 bg-slate-50/50 dark:bg-slate-800/50 z-0"></div>' : ''}
+                        </div>`;
+                    }).join('');
 
                 daySection.innerHTML = `
-                    <div class="flex justify-between items-center mb-5 pb-3 border-b border-slate-100 dark:border-slate-700">
+                    <div class="flex justify-between items-center mb-5 pb-4 border-b border-slate-200/50 dark:border-slate-700/50">
                         <div class="flex items-center space-x-3">
                             ${densityIndicator}
-                            <h3 class="text-sm font-bold ${day.isToday ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-800 dark:text-white'}">${day.label}</h3>
+                            <h3 class="text-base font-extrabold ${day.isToday ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-800 dark:text-white'}">${day.label}</h3>
                         </div>
-                        <div class="flex items-center space-x-2">
-                            <span class="text-[11px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 px-2.5 py-1 rounded-md">${dayEvents.length} Jadwal</span>
-                            ${activeFilterDate ? `<button onclick="resetCalendarFilter()" class="text-xs text-rose-500 font-bold hover:underline">Clear Filter</button>` : ''}
-                        </div>
+                        <span class="text-[10px] uppercase font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-3 py-1.5 rounded-lg shadow-inner">${dayEvents.length} Agenda</span>
                     </div>
                     <div>${eventsHTML}</div>
                 `;
                 container.appendChild(daySection);
             });
+
+            if(!activeFilterDate && !searchQuery) updateDashboardStats(todayEventsCount);
+            document.getElementById('dashboard-stats').classList.remove('hidden');
         };
 
-        function resetCalendarFilter() {
-            activeFilterDate = null;
-            generatedDays = generateDaysArray(currentDays);
-            renderTimeline();
-        }
-
         document.getElementById('view-selector').addEventListener('change', (e) => {
-            currentDays = parseInt(e.target.value);
-            activeFilterDate = null;
-            generatedDays = generateDaysArray(currentDays);
-            renderTimeline();
+            currentDays = parseInt(e.target.value); activeFilterDate = null; generatedDays = generateDaysArray(currentDays); renderTimeline();
         });
 
         document.getElementById('search-input').addEventListener('input', (e) => {
-            searchQuery = e.target.value.toLowerCase().trim();
-            renderTimeline();
+            searchQuery = e.target.value.toLowerCase().trim(); renderTimeline();
         });
 
         document.getElementById('schedule-form').addEventListener('submit', (e) => {
             e.preventDefault();
-            const newEvent = {
+            events.push({
                 id: 'evt_' + Date.now(),
-                title: document.getElementById('event-title').value,
-                date: document.getElementById('event-date').value,
-                category: document.getElementById('event-category').value,
-                time: document.getElementById('event-time').value,
-                duration: parseInt(document.getElementById('event-duration').value),
-                recurrence: document.getElementById('event-recurrence').value,
-                description: document.getElementById('event-desc').value
-            };
-            events.push(newEvent);
+                title: document.getElementById('event-title').value, date: document.getElementById('event-date').value,
+                category: document.getElementById('event-category').value, time: document.getElementById('event-time').value,
+                duration: parseInt(document.getElementById('event-duration').value), recurrence: document.getElementById('event-recurrence').value,
+                description: document.getElementById('event-desc').value, completed: false
+            });
             localStorage.setItem('scheduly_events', JSON.stringify(events));
-            
-            document.getElementById('event-title').value = '';
-            document.getElementById('event-desc').value = '';
-            
+            e.target.reset(); populateDateDropdown();
             if(activeView === 'calendar') renderMonthlyCalendar(); else renderTimeline();
-            showToast("Jadwal ditambahkan!");
+            showToast("Jadwal berhasil ditambahkan! 🚀");
         });
 
-        window.confirmDelete = (id) => {
-            const isDark = document.documentElement.classList.contains('dark');
-            Swal.fire({
-                title: 'Hapus Jadwal?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#4f46e5',
-                cancelButtonColor: '#ef4444',
-                confirmButtonText: 'Ya, Hapus',
-                background: isDark ? '#1e293b' : '#ffffff',
-                color: isDark ? '#ffffff' : '#0f172a',
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    events = events.filter(e => e.id !== id);
-                    localStorage.setItem('scheduly_events', JSON.stringify(events));
-                    if(activeView === 'calendar') renderMonthlyCalendar(); else renderTimeline();
-                    showToast("Jadwal dihapus", "error");
-                }
-            });
-        };
-
-        setInterval(() => {
-            document.getElementById('current-time').textContent = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB';
-        }, 1000);
+        setInterval(() => document.getElementById('current-time').textContent = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB', 1000);
 
         generatedDays = generateDaysArray(currentDays);
         populateDateDropdown();
-        renderTimeline();
+        switchMainView('timeline');
     </script>
 </body>
 </html>
