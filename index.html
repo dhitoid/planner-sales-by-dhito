@@ -107,47 +107,30 @@
             });
         };
 
-        // Fungsi membuat file .ICS yang kompatibel penuh dengan iOS & Android
+        // Fungsi integrasi langsung ke Google Calendar (Sangat aman untuk iPhone & Android)
         const downloadICS = (event) => {
             const [year, month, day] = event.date.split('-');
             const [hours, minutes] = event.time.split(':');
             
+            // Format tanggal yang dibutuhkan Google: YYYYMMDDTHHMMSSZ
             const startDate = new Date(year, month - 1, day, hours, minutes);
             const endDate = new Date(startDate.getTime() + event.duration * 60000);
 
-            const formatICSDate = (date) => {
+            const formatGoogleDate = (date) => {
                 return date.toISOString().replace(/-|:|\.\d\d\d/g, "");
             };
 
-            // Format bersih & wajib menggunakan format Apple standard
-            const icsContent = [
-                "BEGIN:VCALENDAR",
-                "VERSION:2.0",
-                "PRODID:-//Apple Inc.//Mac OS X 10.15//EN", // Menipu iOS agar mengenalnya sebagai kalender asli
-                "CALSCALE:GREGORIAN",
-                "METHOD:PUBLISH",
-                "BEGIN:VEVENT",
-                `UID:${event.id}@scheduly.local`,
-                `DTSTAMP:${formatICSDate(new Date())}`,
-                `DTSTART:${formatICSDate(startDate)}`,
-                `DTEND:${formatICSDate(endDate)}`,
-                `SUMMARY:${event.title}`,
-                `DESCRIPTION:${event.description.replace(/\n/g, '\\n')}`,
-                "SEQUENCE:0",
-                "STATUS:CONFIRMED",
-                "TRANSP:OPAQUE",
-                "END:VEVENT",
-                "END:VCALENDAR"
-            ].join("\r\n");
+            const gStart = formatGoogleDate(startDate);
+            const gEnd = formatGoogleDate(endDate);
+            
+            const titleEncoded = encodeURIComponent(event.title);
+            const descEncoded = encodeURIComponent(event.description);
 
-            // Menggunakan tipe data 'text/calendar' murni agar iOS langsung mengenalinya
-            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.setAttribute('download', `${event.title.replace(/\s+/g, '_')}.ics`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            // Membuat URL universal Google Calendar
+            const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${titleEncoded}&dates=${gStart}/${gEnd}&details=${descEncoded}&sf=true&output=xml`;
+
+            // Buka di tab baru, iPhone akan otomatis menawarkan untuk simpan ke akun kalender
+            window.open(googleCalendarUrl, '_blank');
         };
 
         // Render Timeline Utama
