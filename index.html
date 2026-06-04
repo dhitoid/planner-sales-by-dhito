@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scheduly - 7 Days Planner & Reminder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen pb-12">
+
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm backdrop-blur-md bg-white/80">
+        <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-indigo-600 text-white p-2 rounded-xl shadow-md shadow-indigo-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="Date_Range" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <h1 class="text-xl font-bold text-slate-900 tracking-tight">Scheduly <span class="text-xs font-semibold px-2 py-1 bg-indigo-50 text-indigo-600 rounded-full ml-1">7 Hari</span></h1>
+            </div>
+            <span id="current-time" class="text-sm text-slate-500 font-medium"></span>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <div class="lg:col-span-1">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm sticky top-24">
+                <h2 class="text-lg font-semibold text-slate-900 mb-4">Tambah Jadwal Baru</h2>
+                <form id="schedule-form" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Nama Kegiatan</label>
+                        <input type="text" id="event-title" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all" placeholder="Contoh: Meeting Proyek">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Pilih Tanggal (7 Hari Kedepan)</label>
+                        <select id="event-date" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all bg-white">
+                            </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Jam Mulai</label>
+                            <input type="time" id="event-time" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Durasi (Menit)</label>
+                            <input type="number" id="event-duration" min="5" value="60" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Catatan / Deskripsi</label>
+                        <textarea id="event-desc" rows="3" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all" placeholder="Tambahkan detail atau link meeting..."></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-4 rounded-xl shadow-lg shadow-indigo-100 transition-all flex justify-center items-center space-x-2 text-sm mt-2">
+                        <span>Simpan Jadwal</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="lg:col-span-2 space-y-6" id="timeline-container">
+            </div>
+
+    </main>
+
+    <script>
+        // State management
+        let events = JSON.parse(localStorage.getItem('scheduly_events')) || [];
+
+        // Inisialisasi tanggal (Hari Ini sampai 7 hari kedepan)
+        const getNext7Days = () => {
+            const days = [];
+            const options = { weekday: 'long', day: 'numeric', month: 'short' };
+            
+            for (let i = 0; i < 7; i++) {
+                const date = new Date();
+                date.setDate(date.getDate() + i);
+                
+                // Format YYYY-MM-DD untuk key data
+                const dateString = date.toISOString().split('T')[0];
+                // Format cantik untuk UI
+                const label = date.toLocaleDateString('id-ID', options);
+                
+                days.push({ dateString, label, isToday: i === 0 });
+            }
+            return days;
+        };
+
+        const next7Days = getNext7Days();
+
+        // Tampilkan opsi tanggal di Form Input
+        const populateDateDropdown = () => {
+            const select = document.getElementById('event-date');
+            next7Days.forEach(day => {
+                const option = document.createElement('option');
+                option.value = day.dateString;
+                option.textContent = day.isToday ? `Hari Ini (${day.label})` : day.label;
+                select.appendChild(option);
+            });
+        };
+
+        // Fungsi membuat file .ICS untuk integrasi Kalender HP (Android / iOS)
+        const downloadICS = (event) => {
+            const [year, month, day] = event.date.split('-');
+            const [hours, minutes] = event.time.split(':');
+            
+            // Hitung waktu selesai berdasarkan durasi
+            const startDate = new Date(year, month - 1, day, hours, minutes);
+            const endDate = new Date(startDate.getTime() + event.duration * 60000);
+
+            const formatICSDate = (date) => {
+                return date.toISOString().replace(/-|:|\.\d\d\d/g, "");
+            };
+
+            const icsContent = [
+                "BEGIN:VCALENDAR",
+                "VERSION:2.0",
+                "PRODID:-//Scheduly App//NONSGML v1.0//EN",
+                "BEGIN:VEVENT",
+                `UID:${event.id}`,
+                `DTSTAMP:${formatICSDate(new Date())}`,
+                `DTSTART:${formatICSDate(startDate)}`,
+                `DTEND:${formatICSDate(endDate)}`,
+                `SUMMARY:${event.title}`,
+                `DESCRIPTION:${event.description.replace(/\n/g, '\\n')}`,
+                "END:VEVENT",
+                "END:VCALENDAR"
+            ].join("\r\n");
+
+            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute('download', `${event.title.replace(/\s+/g, '_')}.ics`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+
+        // Render Timeline Utama
+        const renderTimeline = () => {
+            const container = document.getElementById('timeline-container');
+            container.innerHTML = '';
+
+            next7Days.forEach(day => {
+                // Filter event yang sesuai dengan tanggal hari ini
+                const dayEvents = events
+                    .filter(e => e.date === day.dateString)
+                    .sort((a, b) => a.time.localeCompare(b.time));
+
+                const daySection = document.createElement('div');
+                daySection.className = `bg-white rounded-2xl border ${day.isToday ? 'border-indigo-200 ring-2 ring-indigo-500/5' : 'border-slate-200'} p-6 shadow-sm transition-all`;
+                
+                let eventsHTML = '';
+                if (dayEvents.length === 0) {
+                    eventsHTML = `<p class="text-sm text-slate-400 italic py-2">Tidak ada jadwal untuk hari ini.</p>`;
+                } else {
+                    dayEvents.forEach(e => {
+                        eventsHTML += `
+                            <div class="flex items-start justify-between p-4 bg-slate-50 rounded-xl border border-slate-100 hover:border-indigo-100 transition-all group">
+                                <div class="space-y-1">
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-xs font-bold px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded-md">${e.time}</span>
+                                        <h4 class="text-sm font-semibold text-slate-900">${e.title}</h4>
+                                    </div>
+                                    ${e.description ? `<p class="text-xs text-slate-500 pl-1">${e.description}</p>` : ''}
+                                    <p class="text-[10px] text-slate-400 pl-1">Durasi: ${e.duration} menit</p>
+                                </div>
+                                <div class="flex space-x-2 opacity-80 group-hover:opacity-100 transition-all">
+                                    <button onclick="syncToDevice('${e.id}')" title="Sinkron ke HP (Android/iPhone)" class="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                        </svg>
+                                    </button>
+                                    <button onclick="deleteEvent('${e.id}')" title="Hapus" class="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+
+                daySection.innerHTML = `
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="flex items-center space-x-2">
+                            <h3 class="text-md font-bold ${day.isToday ? 'text-indigo-600' : 'text-slate-900'}">${day.label}</h3>
+                            ${day.isToday ? '<span class="text-[10px] font-extrabold uppercase tracking-wider bg-indigo-600 text-white px-2 py-0.5 rounded-full">Hari Ini</span>' : ''}
+                        </div>
+                        <span class="text-xs font-medium text-slate-400">${dayEvents.length} Kegiatan</span>
+                    </div>
+                    <div class="space-y-3">${eventsHTML}</div>
+                `;
+                container.appendChild(daySection);
+            });
+        };
+
+        // Aksi: Tambah Event
+        document.getElementById('schedule-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const newEvent = {
+                id: 'event_' + Date.now(),
+                title: document.getElementById('event-title').value,
+                date: document.getElementById('event-date').value,
+                time: document.getElementById('event-time').value,
+                duration: parseInt(document.getElementById('event-duration').value),
+                description: document.getElementById('event-desc').value
+            };
+
+            events.push(newEvent);
+            localStorage.setItem('scheduly_events', JSON.stringify(events));
+            
+            // Reset form & re-render
+            document.getElementById('event-title').value = '';
+            document.getElementById('event-desc').value = '';
+            
+            renderTimeline();
+        });
+
+        // Aksi: Hapus Event
+        window.deleteEvent = (id) => {
+            events = events.filter(e => e.id !== id);
+            localStorage.setItem('scheduly_events', JSON.stringify(events));
+            renderTimeline();
+        };
+
+        // Aksi: Sinkronisasi Ekspor Kalender HP
+        window.syncToDevice = (id) => {
+            const event = events.find(e => e.id === id);
+            if (event) downloadICS(event);
+        };
+
+        // Menampilkan jam saat ini di header
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('current-time').textContent = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB';
+        }, 1000);
+
+        // Run On Load
+        populateDateDropdown();
+        renderTimeline();
+    </script>
+</body>
+</html>
