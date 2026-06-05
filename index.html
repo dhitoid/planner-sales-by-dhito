@@ -431,8 +431,16 @@
                 `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
 
-        window.togglePomodoro = () => {
-            const btn = document.getElementById('pomo-start');
+window.togglePomodoro = () => {
+    // Minta izin notifikasi otomatis jika belum
+    if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+        Notification.requestPermission().then(permission => {
+            if(permission === 'granted') checkNotificationState();
+        });
+    }
+    
+    const btn = document.getElementById('pomo-start');
+    // ... sisa kodemu ...
             if (isPomoRunning) {
                 clearInterval(pomoInterval);
                 btn.textContent = 'Lanjutkan';
@@ -574,14 +582,14 @@ function checkUpcomingReminders() {
                     ]
                 };
 
-                // Munculkan System Notification
-                if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-                    navigator.serviceWorker.ready.then(registration => {
-                        registration.showNotification(notifTitle, notifOptions);
-                    });
-                } else {
-                    new Notification(notifTitle, notifOptions);
-                }
+// Munculkan System Notification (Mobile Friendly)
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.ready.then(registration => {
+        registration.showNotification(notifTitle, notifOptions);
+    });
+} else {
+    new Notification(notifTitle, notifOptions); // Fallback untuk browser lawas
+}
 
                 // Bunyikan Alarm pop-up di layar HANYA saat jadwal tepat waktu (0 menit)
                 // Kamu bisa ganti kondisinya jika ingin alarm bunyi di 5/10 menit juga
