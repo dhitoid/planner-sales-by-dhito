@@ -1300,16 +1300,22 @@ setInterval(checkUpcomingReminders, 15000);
 					serviceWorkerRegistration: registration 
 				});
 
-				if (currentToken && currentUser) {
-					// Simpan token ke Firestore milik user ini
-					await setDoc(doc(db, "users", currentUser.uid), {
-						fcmToken: currentToken
-					}, { merge: true });
-					console.log("Token FCM berhasil disimpan:", currentToken);
-					showToast("Sistem Pengingat Server Aktif!", "success");
-				} else {
-					showToast("Gagal: Harus login terlebih dahulu.", "error");
-				}
+// ... (setelah const currentToken = await getToken(...))
+console.log("Token yang didapat dari Firebase:", currentToken); // Cek ini di console
+
+if (currentToken) {
+    if (currentUser) {
+        await setDoc(doc(db, "users", currentUser.uid), {
+            fcmToken: currentToken
+        }, { merge: true });
+        showToast("Sistem Pengingat Server Aktif!", "success");
+    } else {
+        // Mungkin user belum login
+        showToast("Gagal: Harus login terlebih dahulu.", "error");
+    }
+} else {
+    showToast("Token kosong, silakan coba lagi.", "error");
+}
 			} else {
                 showToast("Izin notifikasi ditolak oleh perangkat.", "error");
             }
