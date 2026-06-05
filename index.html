@@ -1091,12 +1091,12 @@
         renderTimeline();
     </script>
     
-    <script type="module">
+<script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+    // 1. Ganti getDoc dengan onSnapshot untuk fitur real-time
+    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-    // 1. GANTI DENGAN CONFIG DARI FIREBASE PROJECT SETTINGS KAMU
     const firebaseConfig = {
       apiKey: "AIzaSyDheNr02M_ReVweMi1hD9S4VRlnW3NqaIE",
       authDomain: "scheduly-pro.firebaseapp.com",
@@ -1112,55 +1112,66 @@
     const provider = new GoogleAuthProvider();
 
     let currentUser = null;
+    let unsubscribeEvents = null; // Menyimpan fungsi pembatalan listener real-time
+
+    // Amankan fungsi asli localStorage ke scope paling atas modul
+    const originalSetItem = localStorage.setItem;
 
     // Elemen UI Firebase
     const loginScreen = document.getElementById('login-screen');
     const btnLogin = document.getElementById('btn-login-google');
     const btnLogout = document.getElementById('btn-logout');
 
-    // Override fungsi penyimpanan agar sinkron ke Firestore
+    // Fungsi sinkronisasi ke cloud saat ada perubahan data lokal
     window.syncToCloud = async () => {
         if (!currentUser) return;
         try {
             await setDoc(doc(db, "users", currentUser.uid), {
-                events: window.events // Mengambil variabel global events dari script lama
+                events: window.events
             });
         } catch (e) {
             console.error("Gagal sinkron ke cloud", e);
         }
     };
 
-    // Ambil data saat pertama kali login
-    const loadFromCloud = async (uid) => {
-        try {
-            const docRef = doc(db, "users", uid);
-            const docSnap = await getDoc(docRef);
+    // 2. REVISI: Menggunakan onSnapshot agar sinkron otomatis secara Real-Time
+    const listenToCloud = (uid) => {
+        if (unsubscribeEvents) unsubscribeEvents(); // Bersihkan listener lama jika ada
+
+        const docRef = doc(db, "users", uid);
+        unsubscribeEvents = onSnapshot(docRef, (docSnap) => {
             if (docSnap.exists() && docSnap.data().events) {
                 window.events = docSnap.data().events;
-                localStorage.setItem('scheduly_events', JSON.stringify(window.events));
                 
-                // Panggil ulang render dari script utamamu
-                if(window.activeView === 'calendar') window.renderMonthlyCalendar(); 
-                else window.renderTimeline();
+                // Gunakan originalSetItem agar tidak memicu loop tak berujung ke cloud
+                originalSetItem.call(localStorage, 'scheduly_events', JSON.stringify(window.events));
+                
+                // Panggil ulang render dari script utama agar UI langsung berubah
+                if (window.activeView === 'calendar') {
+                    if (typeof window.renderMonthlyCalendar === 'function') window.renderMonthlyCalendar(); 
+                } else {
+                    if (typeof window.renderTimeline === 'function') window.renderTimeline();
+                }
             }
-        } catch (e) {
-            console.error("Gagal menarik data", e);
-        }
+        }, (error) => {
+            console.error("Gagal mendengarkan perubahan data cloud:", error);
+        });
     };
 
     // Listener Status Login
     onAuthStateChanged(auth, (user) => {
         if (user) {
             currentUser = user;
-            loginScreen.classList.add('hidden'); // Sembunyikan layar login
-            btnLogout.classList.remove('hidden'); // Tampilkan tombol logout
+            loginScreen.classList.add('hidden');
+            btnLogout.classList.remove('hidden');
             
             showToast(`Selamat datang, ${user.displayName}!`, "success");
-            loadFromCloud(user.uid);
+            listenToCloud(user.uid); // Mulai dengerin data secara real-time
         } else {
             currentUser = null;
-            loginScreen.classList.remove('hidden'); // Tampilkan layar login
+            loginScreen.classList.remove('hidden');
             btnLogout.classList.add('hidden');
+            if (unsubscribeEvents) unsubscribeEvents(); // Matikan listener jika logout
         }
     });
 
@@ -1173,7 +1184,7 @@
 
     btnLogout.addEventListener('click', () => {
         signOut(auth).then(() => {
-            window.events = []; // Bersihkan data di layar
+            window.events = [];
             localStorage.removeItem('scheduly_events');
             window.renderTimeline();
             showToast("Berhasil Keluar", "success");
@@ -1181,8 +1192,6 @@
     });
 
     // --- OVERRIDE STORAGE LAMA KE CLOUD ---
-    // Agar perubahan apapun (tambah, edit, centang selesai, hapus) langsung nge-save ke Firebase
-    const originalSetItem = localStorage.setItem;
     localStorage.setItem = function(key, value) {
         originalSetItem.apply(this, arguments);
         if (key === 'scheduly_events') {
