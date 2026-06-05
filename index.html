@@ -16,13 +16,28 @@
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    animation: {
+                        'gradient-x': 'gradient-x 3s ease infinite',
+                    },
+                    keyframes: {
+                        'gradient-x': {
+                            '0%, 100%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'left center'
+                            },
+                            '50%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'right center'
+                            }
+                        }
+                    }
                 }
             }
         }
     </script>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
@@ -35,6 +50,9 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         .dark ::-webkit-scrollbar-thumb { background: #475569; }
+        /* Glassmorphism utility */
+        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+        .dark .glass { background: rgba(30, 41, 59, 0.7); }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen pb-12 transition-colors duration-300">
@@ -61,26 +79,27 @@
         </div>
     </div>
 
-    <header class="bg-white/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50 shadow-sm backdrop-blur-lg transition-colors duration-300">
+    <header class="glass border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50 shadow-sm transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
             
             <div class="flex items-center space-x-3 w-full md:w-auto justify-between md:justify-start">
                 <div class="flex items-center space-x-3">
-                    <div class="bg-gradient-to-tr from-indigo-600 to-violet-500 text-white p-2.5 rounded-xl shadow-lg shadow-indigo-200 dark:shadow-none">
+                    <div class="bg-gradient-to-tr from-indigo-600 to-violet-500 text-white p-2.5 rounded-xl shadow-lg shadow-indigo-200 dark:shadow-none animate-gradient-x">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                     </div>
                     <div>
-                        <h1 class="text-xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center">
-                            Scheduly <span class="text-[10px] font-bold px-2 py-0.5 bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 rounded-full ml-2 uppercase tracking-wider">Pro</span>
+                        <h1 class="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center">
+                            Scheduly <span class="text-[10px] font-bold px-2 py-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-full ml-2 uppercase tracking-wider shadow-sm">Pro</span>
                         </h1>
                         <span id="current-time" class="block text-xs text-indigo-600 dark:text-indigo-400 font-bold"></span>
                     </div>
                 </div>
                 
                 <div class="flex items-center space-x-2">
-                    <button id="noti-btn" onclick="requestNotificationPermission()" class="p-2.5 bg-amber-50 dark:bg-amber-950/40 text-amber-600 rounded-xl hidden" title="Aktifkan Alarm Pengingat">
+                    <button id="noti-btn" onclick="requestNotificationPermission()" class="p-2.5 bg-amber-50 dark:bg-amber-950/40 text-amber-600 rounded-xl hidden relative" title="Aktifkan Alarm Pengingat">
+                        <span class="absolute top-0 right-0 flex h-2.5 w-2.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span></span>
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
                     </button>
                     <button onclick="manageData()" class="p-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" title="Backup & Restore Data">
@@ -96,15 +115,15 @@
             <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
                 <div class="bg-slate-100 dark:bg-slate-800 p-1 rounded-xl flex w-full sm:w-auto">
                     <button id="btn-view-timeline" onclick="switchMainView('timeline')" class="flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-white dark:bg-slate-700 shadow-sm text-indigo-600 dark:text-white">Timeline</button>
-                    <button id="btn-view-calendar" onclick="switchMainView('calendar')" class="flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500 dark:text-slate-400">Kalender Bulanan</button>
+                    <button id="btn-view-calendar" onclick="switchMainView('calendar')" class="flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">Kalender Bulanan</button>
                 </div>
 
                 <div class="relative w-full sm:w-48" id="search-wrapper">
-                    <input type="text" id="search-input" placeholder="Cari jadwal..." class="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white">
+                    <input type="text" id="search-input" placeholder="Cari jadwal..." class="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white backdrop-blur-sm transition-all">
                     <svg class="w-4 h-4 absolute left-3 top-2.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
                 
-                <select id="view-selector" class="w-full sm:w-auto px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                <select id="view-selector" class="w-full sm:w-auto px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 text-sm font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer backdrop-blur-sm">
                     <option value="7">7 Hari</option>
                     <option value="14">14 Hari</option>
                     <option value="30">30 Hari</option>
@@ -115,26 +134,48 @@
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        <div class="lg:col-span-1">
+        <div class="lg:col-span-1 space-y-6">
+            
+            <div class="bg-gradient-to-br from-indigo-600 to-violet-700 p-6 rounded-3xl shadow-xl shadow-indigo-200 dark:shadow-none text-white relative overflow-hidden group">
+                <div class="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-white opacity-10 blur-2xl"></div>
+                <div class="flex justify-between items-center mb-4 relative z-10">
+                    <h2 class="text-sm font-bold flex items-center uppercase tracking-wider">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        Focus Timer
+                    </h2>
+                    <span class="text-[10px] bg-white/20 px-2 py-0.5 rounded-full font-semibold">Pomodoro</span>
+                </div>
+                <div class="text-5xl font-extrabold text-center tracking-widest my-6 font-mono drop-shadow-lg" id="pomodoro-time">25:00</div>
+                <div class="flex gap-2 relative z-10">
+                    <button id="pomo-start" onclick="togglePomodoro()" class="flex-1 bg-white text-indigo-700 hover:bg-slate-50 py-2.5 rounded-xl text-sm font-bold shadow-md transition-all">Mulai</button>
+                    <button id="pomo-reset" onclick="resetPomodoro()" class="px-4 bg-indigo-800/40 hover:bg-indigo-800/60 text-white py-2.5 rounded-xl text-sm font-bold transition-all">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                    </button>
+                </div>
+            </div>
+
             <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/40 dark:shadow-none sticky top-28 transition-colors duration-300">
                 <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-5 flex items-center">
                     <svg class="w-5 h-5 mr-2 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
                     Tambah Jadwal
                 </h2>
                 <form id="schedule-form" class="space-y-4">
-                    <div>
+                    <div class="relative">
                         <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Nama Kegiatan</label>
-                        <input type="text" id="event-title" required class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm" placeholder="Contoh: Run Synchronize Data">
+                        <input type="text" id="event-title" required class="w-full pl-4 pr-10 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm transition-all" placeholder="Contoh: Belajar Javascript">
+                        <button type="button" onclick="startVoiceInput()" title="Dikte dengan Suara" class="absolute right-3 top-8 text-slate-400 hover:text-indigo-500 transition-colors">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
+                        </button>
                     </div>
                     
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Pilih Tanggal</label>
-                            <select id="event-date" required class="w-full px-3 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm"></select>
+                            <select id="event-date" required class="w-full px-3 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm transition-all"></select>
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Label Kategori</label>
-                            <select id="event-category" required class="w-full px-3 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm">
+                            <select id="event-category" required class="w-full px-3 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm transition-all">
                                 <option value="kerja">Kerja</option>
                                 <option value="belajar">Belajar</option>
                                 <option value="santai">Santai</option>
@@ -146,28 +187,28 @@
                     <div class="grid grid-cols-3 gap-3">
                         <div>
                             <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Jam Mulai</label>
-                            <input type="time" id="event-time" required class="w-full px-2 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm">
+                            <input type="time" id="event-time" required class="w-full px-2 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm transition-all">
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Durasi (Mnt)</label>
-                            <input type="number" id="event-duration" min="5" value="60" required class="w-full px-2 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm">
+                            <input type="number" id="event-duration" min="5" value="60" required class="w-full px-2 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm transition-all">
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Perulangan</label>
-                            <select id="event-recurrence" class="w-full px-1 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 dark:text-white focus:ring-2 focus:ring-indigo-500 text-xs font-semibold">
+                            <select id="event-recurrence" class="w-full px-1 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 dark:text-white focus:ring-2 focus:ring-indigo-500 text-xs font-semibold transition-all">
                                 <option value="none">Sekali</option>
                                 <option value="daily">Tiap Hari</option>
-                                <option value="weekly">Tiap Minggu</option>
+                                <option value="weekly">Mingguan</option>
                             </select>
                         </div>
                     </div>
 
                     <div>
                         <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Catatan (Opsional)</label>
-                        <textarea id="event-desc" rows="2" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm resize-none" placeholder="Detail deskripsi kegiatan..."></textarea>
+                        <textarea id="event-desc" rows="2" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm resize-none transition-all" placeholder="Detail deskripsi kegiatan..."></textarea>
                     </div>
 
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-xl shadow-lg shadow-indigo-200 dark:shadow-none transition-all text-sm mt-4 flex justify-center items-center">
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-xl shadow-lg shadow-indigo-200 dark:shadow-none transition-all hover:scale-[1.02] text-sm mt-4 flex justify-center items-center">
                         <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>
                         Simpan Jadwal
                     </button>
@@ -176,28 +217,43 @@
         </div>
 
         <div class="lg:col-span-2 space-y-6">
-            <div id="stats-container" class="grid grid-cols-3 gap-4">
-                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between">
-                    <span class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">Total Agenda</span>
-                    <span id="stat-total" class="text-2xl font-bold text-indigo-600 dark:text-indigo-400 mt-1">0</span>
+            
+            <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col gap-4">
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl flex flex-col justify-between border border-transparent hover:border-indigo-100 transition-colors">
+                        <span class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">Total Agenda</span>
+                        <span id="stat-total" class="text-2xl font-bold text-indigo-600 dark:text-indigo-400 mt-1">0</span>
+                    </div>
+                    <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl flex flex-col justify-between border border-transparent hover:border-emerald-100 transition-colors">
+                        <span class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">Selesai</span>
+                        <span id="stat-done" class="text-2xl font-bold text-emerald-500 dark:text-emerald-400 mt-1">0</span>
+                    </div>
+                    <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl flex flex-col justify-between border border-transparent hover:border-amber-100 transition-colors">
+                        <span class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">Sisa Jadwal</span>
+                        <span id="stat-pending" class="text-2xl font-bold text-amber-500 dark:text-amber-400 mt-1">0</span>
+                    </div>
                 </div>
-                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between">
-                    <span class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">Selesai</span>
-                    <span id="stat-done" class="text-2xl font-bold text-emerald-500 dark:text-emerald-400 mt-1">0</span>
-                </div>
-                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between">
-                    <span class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">Sisa Jadwal</span>
-                    <span id="stat-pending" class="text-2xl font-bold text-amber-500 dark:text-amber-400 mt-1">0</span>
+
+                <div class="pt-2 border-t border-slate-100 dark:border-slate-700">
+                    <div class="flex justify-between items-end mb-2">
+                        <span class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">Progres Penyelesaian Keseluruhan</span>
+                        <span id="progress-text" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 px-2 py-0.5 rounded-md">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-100 dark:bg-slate-700/50 rounded-full h-2.5 overflow-hidden">
+                        <div id="progress-bar" class="bg-gradient-to-r from-indigo-500 to-emerald-400 h-2.5 rounded-full transition-all duration-1000 ease-out relative" style="width: 0%">
+                            <div class="absolute top-0 right-0 bottom-0 left-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMSIvPgo8L3N2Zz4=')] opacity-30"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <div id="category-filter-wrapper" class="flex flex-wrap items-center gap-2 bg-white dark:bg-slate-800 p-3 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
                 <span class="text-xs font-bold text-slate-400 dark:text-slate-500 px-2">Filter:</span>
-                <button onclick="setCategoryFilter('all')" id="filter-all" class="px-3 py-1 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow-sm transition-all">Semua</button>
-                <button onclick="setCategoryFilter('kerja')" id="filter-kerja" class="px-3 py-1 rounded-xl text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition-all">Kerja</button>
-                <button onclick="setCategoryFilter('belajar')" id="filter-belajar" class="px-3 py-1 rounded-xl text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition-all">Belajar</button>
-                <button onclick="setCategoryFilter('santai')" id="filter-santai" class="px-3 py-1 rounded-xl text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition-all">Santai</button>
-                <button onclick="setCategoryFilter('penting')" id="filter-penting" class="px-3 py-1 rounded-xl text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition-all">Penting</button>
+                <button onclick="setCategoryFilter('all')" id="filter-all" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow-sm transition-all hover:bg-indigo-700">Semua</button>
+                <button onclick="setCategoryFilter('kerja')" id="filter-kerja" class="px-3 py-1.5 rounded-xl text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-all">Kerja</button>
+                <button onclick="setCategoryFilter('belajar')" id="filter-belajar" class="px-3 py-1.5 rounded-xl text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-all">Belajar</button>
+                <button onclick="setCategoryFilter('santai')" id="filter-santai" class="px-3 py-1.5 rounded-xl text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-all">Santai</button>
+                <button onclick="setCategoryFilter('penting')" id="filter-penting" class="px-3 py-1.5 rounded-xl text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-all">Penting</button>
             </div>
 
             <div id="timeline-container" class="space-y-6"></div>
@@ -206,10 +262,10 @@
                 <div class="flex justify-between items-center mb-6">
                     <h3 id="calendar-month-year" class="text-lg font-bold text-slate-900 dark:text-white"></h3>
                     <div class="flex space-x-2">
-                        <button onclick="changeMonth(-1)" class="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 text-slate-600 dark:text-slate-300">
+                        <button onclick="changeMonth(-1)" class="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 transition-colors">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
                         </button>
-                        <button onclick="changeMonth(1)" class="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 text-slate-600 dark:text-slate-300">
+                        <button onclick="changeMonth(1)" class="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 transition-colors">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                         </button>
                     </div>
@@ -232,12 +288,17 @@
         let events = JSON.parse(localStorage.getItem('scheduly_events')) || [];
         let currentDays = 7;
         let searchQuery = '';
-        let activeCategoryFilter = 'all'; // Filter kategori default
+        let activeCategoryFilter = 'all';
         let generatedDays = [];
         let activeView = 'timeline';
         let calendarDate = new Date();
         let activeFilterDate = null;
         let notifiedEvents = JSON.parse(localStorage.getItem('scheduly_notified')) || [];
+
+        // POMODORO STATE
+        let pomoTime = 1500; // 25 minutes
+        let pomoInterval = null;
+        let isPomoRunning = false;
 
         const svgIcons = {
             kerja: `<svg class="w-3.5 h-3.5 mr-1 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>`,
@@ -259,7 +320,74 @@
                 skeleton.className = "fixed inset-0 z-[100] bg-slate-50 dark:bg-slate-900 p-6 space-y-6 transition-all duration-500 opacity-0 pointer-events-none";
                 checkNotificationState();
             }, 1200);
+            updatePomoDisplay();
         });
+
+        // ================= FEATURE: POMODORO TIMER LOGIC =================
+        function updatePomoDisplay() {
+            const minutes = Math.floor(pomoTime / 60);
+            const seconds = pomoTime % 60;
+            document.getElementById('pomodoro-time').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        window.togglePomodoro = () => {
+            const btn = document.getElementById('pomo-start');
+            if (isPomoRunning) {
+                clearInterval(pomoInterval);
+                btn.textContent = 'Lanjutkan';
+                btn.className = "flex-1 bg-white text-indigo-700 hover:bg-slate-50 py-2.5 rounded-xl text-sm font-bold shadow-md transition-all";
+            } else {
+                btn.textContent = 'Jeda';
+                btn.className = "flex-1 bg-amber-400 text-amber-900 hover:bg-amber-500 py-2.5 rounded-xl text-sm font-bold shadow-md transition-all";
+                pomoInterval = setInterval(() => {
+                    pomoTime--;
+                    updatePomoDisplay();
+                    if (pomoTime <= 0) {
+                        clearInterval(pomoInterval);
+                        showToast("Sesi Pomodoro Selesai! Saatnya istirahat.", "success");
+                        if ('Notification' in window && Notification.permission === 'granted') {
+                            new Notification('Scheduly Pro', { body: 'Waktu Pomodoro habis! Ambil istirahat sebentar.' });
+                        }
+                        resetPomodoro();
+                    }
+                }, 1000);
+            }
+            isPomoRunning = !isPomoRunning;
+        };
+
+        window.resetPomodoro = () => {
+            clearInterval(pomoInterval);
+            isPomoRunning = false;
+            pomoTime = 1500;
+            updatePomoDisplay();
+            const btn = document.getElementById('pomo-start');
+            btn.textContent = 'Mulai';
+            btn.className = "flex-1 bg-white text-indigo-700 hover:bg-slate-50 py-2.5 rounded-xl text-sm font-bold shadow-md transition-all";
+        };
+
+        // ================= FEATURE: SPEECH TO TEXT =================
+        window.startVoiceInput = () => {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                return showToast("Browser Anda tidak mendukung input suara.", "error");
+            }
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'id-ID';
+            recognition.start();
+            showToast("Mendengarkan... Silakan bicara", "success");
+            
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('event-title').value = transcript;
+                showToast("Teks berhasil ditangkap!", "success");
+            };
+            
+            recognition.onerror = (event) => {
+                showToast("Gagal merekam suara.", "error");
+            };
+        };
+
 
         function checkNotificationState() {
             const notiBtn = document.getElementById('noti-btn');
@@ -283,7 +411,7 @@
             if (!('Notification' in window) || Notification.permission !== 'granted') return;
             const now = new Date();
             events.forEach(e => {
-                if (e.completed) return; // Lewati jika sudah selesai dilakukan
+                if (e.completed) return;
                 
                 const isTodayEvent = e.date === now.toISOString().split('T')[0];
                 let shouldCheck = isTodayEvent;
@@ -321,7 +449,7 @@
             if (view === 'timeline') {
                 activeFilterDate = null;
                 tBtn.className = "flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-white dark:bg-slate-700 shadow-sm text-indigo-600 dark:text-white";
-                cBtn.className = "flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500 dark:text-slate-400";
+                cBtn.className = "flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200";
                 tContainer.classList.remove('hidden');
                 cContainer.classList.add('hidden');
                 searchW.classList.remove('hidden');
@@ -329,7 +457,7 @@
                 filterW.classList.remove('hidden');
                 renderTimeline();
             } else {
-                tBtn.className = "flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500 dark:text-slate-400";
+                tBtn.className = "flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200";
                 cBtn.className = "flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-white dark:bg-slate-700 shadow-sm text-indigo-600 dark:text-white";
                 tContainer.classList.add('hidden');
                 cContainer.classList.remove('hidden');
@@ -345,22 +473,21 @@
             renderMonthlyCalendar();
         }
 
-        // FEATURE BARU: FILTER KATEGORI PILLS LOGIC
         function setCategoryFilter(category) {
             activeCategoryFilter = category;
             const items = ['all', 'kerja', 'belajar', 'santai', 'penting'];
             items.forEach(item => {
                 const btn = document.getElementById(`filter-${item}`);
                 if(item === category) {
-                    btn.className = "px-3 py-1 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow-sm transition-all";
+                    btn.className = "px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow-sm transition-all hover:bg-indigo-700";
                 } else {
-                    btn.className = "px-3 py-1 rounded-xl text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition-all";
+                    btn.className = "px-3 py-1.5 rounded-xl text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-all";
                 }
             });
             renderTimeline();
         }
 
-        // FEATURE BARU: UPDATE TOTAL & STATISTIK 
+        // ================= UPGRADE: STATS & PROGRESS BAR =================
         function updateStatsWidgets() {
             const total = events.length;
             const done = events.filter(e => e.completed).length;
@@ -369,9 +496,13 @@
             document.getElementById('stat-total').textContent = total;
             document.getElementById('stat-done').textContent = done;
             document.getElementById('stat-pending').textContent = pending;
+
+            // Hitung persentase progress bar
+            const percent = total === 0 ? 0 : Math.round((done / total) * 100);
+            document.getElementById('progress-bar').style.width = percent + '%';
+            document.getElementById('progress-text').textContent = percent + '%';
         }
 
-        // FEATURE BARU: TOGGLE STATUS SELESAI (CHECKLIST)
         window.toggleCompleteEvent = (id) => {
             events = events.map(e => {
                 if(e.id === id) e.completed = !e.completed;
@@ -379,10 +510,9 @@
             });
             localStorage.setItem('scheduly_events', JSON.stringify(events));
             renderTimeline();
-            showToast("Status jadwal diperbarui");
+            showToast(events.find(e => e.id === id).completed ? "Jadwal diselesaikan! 🎉" : "Status dibatalkan", "success");
         };
 
-        // FEATURE BARU: LIVE EDITING MODAL VIA SWEETALERT2
         window.editEvent = (id) => {
             const event = events.find(e => e.id === id);
             if (!event) return;
@@ -495,7 +625,7 @@
                 const dateString = (new Date(currentLoopDate.getTime() - offset)).toISOString().split('T')[0];
 
                 const dayCell = document.createElement('button');
-                dayCell.className = `p-3 rounded-2xl border border-slate-100 dark:border-slate-700/60 flex flex-col items-center justify-between min-h-[64px] transition-all hover:bg-indigo-50 dark:hover:bg-indigo-500/20 ${dateString === todayStr ? 'ring-2 ring-indigo-500 font-extrabold' : ''}`;
+                dayCell.className = `p-3 rounded-2xl border border-slate-100 dark:border-slate-700/60 flex flex-col items-center justify-between min-h-[64px] transition-all hover:bg-indigo-50 dark:hover:bg-indigo-500/20 hover:scale-105 ${dateString === todayStr ? 'ring-2 ring-indigo-500 font-extrabold shadow-md' : ''}`;
                 dayCell.innerHTML = `<span class="text-sm dark:text-slate-200">${day}</span>`;
 
                 const dayEvents = events.filter(e => {
@@ -552,7 +682,7 @@
         const showToast = (msg, type = 'success') => {
             Toastify({
                 text: msg, duration: 3000, gravity: "bottom", position: "right", 
-                style: { background: type === 'success' ? "#10B981" : "#EF4444", borderRadius: "10px", fontSize: "14px" }
+                style: { background: type === 'success' ? "linear-gradient(to right, #10B981, #059669)" : "linear-gradient(to right, #EF4444, #DC2626)", borderRadius: "12px", fontSize: "14px", fontWeight: "600", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)" }
             }).showToast();
         };
 
@@ -729,7 +859,7 @@
                 else densityIndicator = `<span class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)] animate-pulse"></span>`;
 
                 const daySection = document.createElement('div');
-                daySection.className = `fade-in bg-white dark:bg-slate-800 rounded-3xl border ${day.isToday ? 'border-indigo-200 dark:border-indigo-500/30 ring-4 ring-indigo-500/10' : 'border-slate-200 dark:border-slate-700'} p-6 sm:p-8 shadow-sm`;
+                daySection.className = `fade-in bg-white dark:bg-slate-800 rounded-3xl border ${day.isToday ? 'border-indigo-200 dark:border-indigo-500/30 ring-4 ring-indigo-500/10' : 'border-slate-200 dark:border-slate-700'} p-6 sm:p-8 shadow-sm transition-all hover:shadow-md`;
                 
                 let eventsHTML = '';
                 if (dayEvents.length === 0) {
@@ -744,20 +874,19 @@
                         const svgRecur = `<svg class="w-3 h-3 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>`;
                         const recurBadge = e.recurrence && e.recurrence !== 'none' ? `<span class="text-[9px] font-extrabold px-1.5 py-0.5 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded">${svgRecur}${e.recurrence}</span>` : '';
                         
-                        // Style modifier jika task selesai
                         const isDone = e.completed ? true : false;
-                        const opacityStyle = isDone ? 'opacity-50 line-through select-none' : '';
+                        const opacityStyle = isDone ? 'opacity-50 line-through select-none grayscale' : '';
 
                         eventsHTML += `
-                            <div class="flex items-start justify-between p-4 bg-slate-50/50 dark:bg-slate-700/30 rounded-2xl border border-slate-100 dark:border-slate-700/50 ${cat.border} hover:bg-white dark:hover:bg-slate-800 hover:shadow-md transition-all duration-300 group mb-3 last:mb-0">
+                            <div class="flex items-start justify-between p-4 bg-slate-50/50 dark:bg-slate-700/30 rounded-2xl border border-slate-100 dark:border-slate-700/50 ${cat.border} hover:bg-white dark:hover:bg-slate-800 hover:shadow-lg transition-all duration-300 group mb-3 last:mb-0 transform hover:-translate-y-0.5">
                                 <div class="flex items-start space-x-3 w-full pr-2">
-                                    <button onclick="toggleCompleteEvent('${e.id}')" class="mt-1 p-1 rounded-lg border transition-all ${isDone ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 dark:border-slate-600 text-transparent hover:border-emerald-500'}">
-                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                    <button onclick="toggleCompleteEvent('${e.id}')" class="mt-1 p-1 rounded-lg border transition-all ${isDone ? 'bg-emerald-500 border-emerald-500 text-white shadow-sm' : 'border-slate-300 dark:border-slate-600 text-transparent hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10'}">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
                                     </button>
                                     
-                                    <div class="space-y-1.5 flex-1 ${opacityStyle}">
+                                    <div class="space-y-1.5 flex-1 ${opacityStyle} transition-all">
                                         <div class="flex flex-wrap items-center gap-2">
-                                            <span class="text-xs font-bold px-2.5 py-1 bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 rounded-lg">${e.time}</span>
+                                            <span class="text-xs font-bold px-2.5 py-1 bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 rounded-lg shadow-sm">${e.time}</span>
                                             <span class="text-[10px] font-bold px-2 py-0.5 ${cat.bg} ${cat.text} rounded-md">${cat.svg}${cat.label}</span>
                                             ${recurBadge}
                                             ${isDone ? `<span class="text-[9px] font-extrabold px-1.5 py-0.5 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 rounded">Selesai</span>` : ''}
@@ -836,7 +965,7 @@
                 duration: parseInt(document.getElementById('event-duration').value),
                 recurrence: document.getElementById('event-recurrence').value,
                 description: document.getElementById('event-desc').value,
-                completed: false // Properti status awal
+                completed: false
             };
             events.push(newEvent);
             localStorage.setItem('scheduly_events', JSON.stringify(events));
