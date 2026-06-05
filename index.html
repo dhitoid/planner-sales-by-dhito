@@ -50,6 +50,21 @@
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-300">
+    
+    <div id="login-screen" class="fixed inset-0 z-[200] bg-slate-900 flex flex-col items-center justify-center p-6 transition-opacity duration-500">
+    <div class="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-2xl max-w-md w-full text-center space-y-6">
+        <div class="inline-block bg-gradient-to-tr from-indigo-600 to-violet-500 p-4 rounded-2xl mb-2">
+            <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+        </div>
+        <h2 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Login Scheduly <span class="text-indigo-500">Pro</span></h2>
+        <p class="text-sm text-slate-500 dark:text-slate-400">Masuk untuk menyimpan dan mensinkronisasi jadwalmu di semua perangkat.</p>
+        
+        <button id="btn-login-google" class="w-full flex items-center justify-center gap-3 bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-700 dark:text-white font-bold py-3 px-4 rounded-xl border border-slate-200 dark:border-slate-600 transition-all">
+            <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#EA4335" d="M5.266 9.765A7.077 7.077 0 0112 4.909c1.69 0 3.218.6 4.408 1.582L19.916 3C17.782 1.145 15.055 0 12 0 7.27 0 3.198 2.698 1.24 6.65l4.026 3.115Z"/><path fill="#34A853" d="M16.04 18.013c-1.09.703-2.474 1.078-4.04 1.078a7.077 7.077 0 01-6.723-4.823l-4.04 3.067A11.965 11.965 0 0012 24c2.933 0 5.735-1.043 7.834-3l-3.793-2.987Z"/><path fill="#4A90E2" d="M19.834 21c2.195-2.048 3.62-5.096 3.62-9 0-.71-.109-1.473-.272-2.182H12v4.637h6.436c-.317 1.559-1.17 2.766-2.395 3.558L19.834 21Z"/><path fill="#FBBC05" d="M5.277 14.268A7.12 7.12 0 014.909 12c0-.782.125-1.533.357-2.235L1.24 6.65A11.934 11.934 0 000 12c0 1.92.445 3.73 1.237 5.335l4.04-3.067Z"/></svg>
+            Lanjutkan dengan Google
+        </button>
+    </div>
+</div>
 
     <div id="skeleton-screen" class="fixed inset-0 z-[100] bg-slate-50 dark:bg-slate-900 p-6 space-y-6">
         <div class="max-w-7xl mx-auto animate-pulse space-y-8">
@@ -92,6 +107,9 @@
                 </div>
                 
                 <div class="flex items-center space-x-2">
+                    <button id="btn-logout" class="p-2.5 bg-rose-50 dark:bg-rose-950/40 text-rose-600 rounded-xl hover:bg-rose-100 transition-colors hidden" title="Keluar Akun">
+    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+</button>
                     <button id="noti-btn" onclick="requestNotificationPermission()" class="p-2.5 bg-amber-50 dark:bg-amber-950/40 text-amber-600 rounded-xl hidden relative" title="Aktifkan Alarm Pengingat">
                         <span class="absolute top-0 right-0 flex h-2.5 w-2.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span></span>
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
@@ -312,12 +330,12 @@
             successSound.play().catch(e => console.log('Audio diputar setelah interaksi user'));
         }
 
-        let events = JSON.parse(localStorage.getItem('scheduly_events')) || [];
+        window.events = JSON.parse(localStorage.getItem('scheduly_events')) || [];
+        window.activeView = 'timeline';
         let currentDays = 7;
         let searchQuery = '';
         let activeCategoryFilter = 'all';
         let generatedDays = [];
-        let activeView = 'timeline';
         let calendarDate = new Date();
         let activeFilterDate = null;
         let notifiedEvents = JSON.parse(localStorage.getItem('scheduly_notified')) || [];
@@ -1072,5 +1090,106 @@
         populateDateDropdown();
         renderTimeline();
     </script>
+    
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+    // 1. GANTI DENGAN CONFIG DARI FIREBASE PROJECT SETTINGS KAMU
+    const firebaseConfig = {
+      apiKey: "AIzaSyDheNr02M_ReVweMi1hD9S4VRlnW3NqaIE",
+      authDomain: "scheduly-pro.firebaseapp.com",
+      projectId: "scheduly-pro",
+      storageBucket: "scheduly-pro.firebasestorage.app",
+      messagingSenderId: "792259340926",
+      appId: "1:792259340926:web:a675394c4b76801bba062f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+
+    let currentUser = null;
+
+    // Elemen UI Firebase
+    const loginScreen = document.getElementById('login-screen');
+    const btnLogin = document.getElementById('btn-login-google');
+    const btnLogout = document.getElementById('btn-logout');
+
+    // Override fungsi penyimpanan agar sinkron ke Firestore
+    window.syncToCloud = async () => {
+        if (!currentUser) return;
+        try {
+            await setDoc(doc(db, "users", currentUser.uid), {
+                events: window.events // Mengambil variabel global events dari script lama
+            });
+        } catch (e) {
+            console.error("Gagal sinkron ke cloud", e);
+        }
+    };
+
+    // Ambil data saat pertama kali login
+    const loadFromCloud = async (uid) => {
+        try {
+            const docRef = doc(db, "users", uid);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists() && docSnap.data().events) {
+                window.events = docSnap.data().events;
+                localStorage.setItem('scheduly_events', JSON.stringify(window.events));
+                
+                // Panggil ulang render dari script utamamu
+                if(window.activeView === 'calendar') window.renderMonthlyCalendar(); 
+                else window.renderTimeline();
+            }
+        } catch (e) {
+            console.error("Gagal menarik data", e);
+        }
+    };
+
+    // Listener Status Login
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            currentUser = user;
+            loginScreen.classList.add('hidden'); // Sembunyikan layar login
+            btnLogout.classList.remove('hidden'); // Tampilkan tombol logout
+            
+            showToast(`Selamat datang, ${user.displayName}!`, "success");
+            loadFromCloud(user.uid);
+        } else {
+            currentUser = null;
+            loginScreen.classList.remove('hidden'); // Tampilkan layar login
+            btnLogout.classList.add('hidden');
+        }
+    });
+
+    // Event Klik Login & Logout
+    btnLogin.addEventListener('click', () => {
+        signInWithPopup(auth, provider).catch((error) => {
+            showToast("Gagal Login: " + error.message, "error");
+        });
+    });
+
+    btnLogout.addEventListener('click', () => {
+        signOut(auth).then(() => {
+            window.events = []; // Bersihkan data di layar
+            localStorage.removeItem('scheduly_events');
+            window.renderTimeline();
+            showToast("Berhasil Keluar", "success");
+        });
+    });
+
+    // --- OVERRIDE STORAGE LAMA KE CLOUD ---
+    // Agar perubahan apapun (tambah, edit, centang selesai, hapus) langsung nge-save ke Firebase
+    const originalSetItem = localStorage.setItem;
+    localStorage.setItem = function(key, value) {
+        originalSetItem.apply(this, arguments);
+        if (key === 'scheduly_events') {
+            window.syncToCloud();
+        }
+    };
+</script>
+
 </body>
 </html>
