@@ -19,17 +19,12 @@
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                     animation: {
                         'gradient-x': 'gradient-x 3s ease infinite',
+                        'bounce-slow': 'bounce 3s infinite',
                     },
                     keyframes: {
                         'gradient-x': {
-                            '0%, 100%': {
-                                'background-size': '200% 200%',
-                                'background-position': 'left center'
-                            },
-                            '50%': {
-                                'background-size': '200% 200%',
-                                'background-position': 'right center'
-                            }
+                            '0%, 100%': { 'background-size': '200% 200%', 'background-position': 'left center' },
+                            '50%': { 'background-size': '200% 200%', 'background-position': 'right center' }
                         }
                     }
                 }
@@ -50,12 +45,11 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         .dark ::-webkit-scrollbar-thumb { background: #475569; }
-        /* Glassmorphism utility */
         .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
         .dark .glass { background: rgba(30, 41, 59, 0.7); }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen pb-12 transition-colors duration-300">
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-300">
 
     <div id="skeleton-screen" class="fixed inset-0 z-[100] bg-slate-50 dark:bg-slate-900 p-6 space-y-6">
         <div class="max-w-7xl mx-auto animate-pulse space-y-8">
@@ -132,7 +126,7 @@
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8 flex-grow">
         
         <div class="lg:col-span-1 space-y-6">
             
@@ -152,6 +146,22 @@
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
                     </button>
                 </div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm transition-colors duration-300 relative overflow-hidden">
+                <div class="absolute -right-4 -top-4 text-slate-100 dark:text-slate-700/50 opacity-50">
+                    <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a8 8 0 100 16 8 8 0 000-16zM6.5 9a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm7 0a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm-6.29 4.71a.75.75 0 101.06 1.06 3.5 3.5 0 003.46 0 .75.75 0 10-1.06-1.06 2 2 0 01-1.98 0 .75.75 0 00-1.48 0z" clip-rule="evenodd"></path></svg>
+                </div>
+                <div class="relative z-10 flex justify-between items-center mb-2">
+                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Cuaca & Motivasi</span>
+                    <span id="weather-temp" class="text-xs font-bold bg-sky-100 dark:bg-sky-900 text-sky-600 dark:text-sky-300 px-2 py-0.5 rounded-full flex items-center">
+                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
+                        Memuat...
+                    </span>
+                </div>
+                <p id="quote-text" class="text-sm font-medium text-slate-600 dark:text-slate-300 italic relative z-10 leading-relaxed pt-1">
+                    "Fokuslah pada langkah di depanmu, bukan seluruh tangga yang harus kamu daki."
+                </p>
             </div>
 
             <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/40 dark:shadow-none sticky top-28 transition-colors duration-300">
@@ -276,13 +286,30 @@
                 <div id="calendar-days-grid" class="grid grid-cols-7 gap-2"></div>
             </div>
         </div>
-
     </main>
+
+    <footer class="mt-auto py-8 border-t border-slate-200 dark:border-slate-800 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col items-center justify-center space-y-2">
+            <p class="text-sm font-medium text-slate-500 dark:text-slate-400 flex items-center">
+                Dibuat dengan <span class="text-rose-500 mx-1.5 animate-bounce-slow inline-block">❤️</span> oleh 
+                <span class="font-extrabold text-indigo-600 dark:text-indigo-400 ml-1.5 tracking-wide hover:underline cursor-pointer transition-all">Dhito</span>
+            </p>
+            <p class="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest font-bold">Scheduly Pro v2.0</p>
+        </div>
+    </footer>
 
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js').catch(err => console.log(err));
+        }
+
+        // ================= NEW: AUDIO EFFECTS =================
+        // Menambahkan sound feedback kecil saat tugas selesai
+        const successSound = new Audio('https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c1539c.mp3?filename=success-1-6297.mp3');
+        function playSound() {
+            successSound.volume = 0.4;
+            successSound.play().catch(e => console.log('Audio diputar setelah interaksi user'));
         }
 
         let events = JSON.parse(localStorage.getItem('scheduly_events')) || [];
@@ -314,16 +341,45 @@
             penting: { label: 'Penting', svg: svgIcons.penting, bg: 'bg-rose-50 dark:bg-rose-500/10', text: 'text-rose-700 dark:text-rose-300', border: 'border-l-4 border-l-rose-500', dot: 'bg-rose-500' }
         };
 
+        // ================= NEW: FETCH WEATHER API =================
+        async function fetchWeather() {
+            try {
+                // Menggunakan titik kordinat Jakarta sebagai default jika geolokasi ditolak
+                const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-6.2088&longitude=106.8456&current_weather=true');
+                const data = await res.json();
+                document.getElementById('weather-temp').innerHTML = `
+                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
+                    ${data.current_weather.temperature}°C
+                `;
+            } catch (err) {
+                console.log("Gagal mengambil data cuaca", err);
+                document.getElementById('weather-temp').textContent = '--°C';
+            }
+        }
+
+        // Daftar Quotes Motivasi
+        const quotes = [
+            "Fokuslah pada langkah di depanmu, bukan seluruh tangga yang harus kamu daki.",
+            "Rahasia dari maju ke depan adalah memulai. – Mark Twain",
+            "Satu-satunya cara melakukan pekerjaan hebat adalah mencintai apa yang kamu lakukan.",
+            "Hari ini adalah kesempatan untuk membangun hari esok yang kamu inginkan.",
+            "Jangan menunda sampai besok apa yang bisa kamu selesaikan hari ini."
+        ];
+
         window.addEventListener('DOMContentLoaded', () => {
+            // Set Quote Acak
+            document.getElementById('quote-text').textContent = `"${quotes[Math.floor(Math.random() * quotes.length)]}"`;
+            
             setTimeout(() => {
                 const skeleton = document.getElementById('skeleton-screen');
                 skeleton.className = "fixed inset-0 z-[100] bg-slate-50 dark:bg-slate-900 p-6 space-y-6 transition-all duration-500 opacity-0 pointer-events-none";
                 checkNotificationState();
+                fetchWeather(); // Panggil API Cuaca setelah loading
             }, 1200);
             updatePomoDisplay();
         });
 
-        // ================= FEATURE: POMODORO TIMER LOGIC =================
+        // POMODORO TIMER LOGIC
         function updatePomoDisplay() {
             const minutes = Math.floor(pomoTime / 60);
             const seconds = pomoTime % 60;
@@ -345,6 +401,7 @@
                     updatePomoDisplay();
                     if (pomoTime <= 0) {
                         clearInterval(pomoInterval);
+                        playSound(); // Mainkan suara saat selesai
                         showToast("Sesi Pomodoro Selesai! Saatnya istirahat.", "success");
                         if ('Notification' in window && Notification.permission === 'granted') {
                             new Notification('Scheduly Pro', { body: 'Waktu Pomodoro habis! Ambil istirahat sebentar.' });
@@ -366,7 +423,7 @@
             btn.className = "flex-1 bg-white text-indigo-700 hover:bg-slate-50 py-2.5 rounded-xl text-sm font-bold shadow-md transition-all";
         };
 
-        // ================= FEATURE: SPEECH TO TEXT =================
+        // SPEECH TO TEXT
         window.startVoiceInput = () => {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
@@ -487,7 +544,6 @@
             renderTimeline();
         }
 
-        // ================= UPGRADE: STATS & PROGRESS BAR =================
         function updateStatsWidgets() {
             const total = events.length;
             const done = events.filter(e => e.completed).length;
@@ -497,20 +553,30 @@
             document.getElementById('stat-done').textContent = done;
             document.getElementById('stat-pending').textContent = pending;
 
-            // Hitung persentase progress bar
             const percent = total === 0 ? 0 : Math.round((done / total) * 100);
             document.getElementById('progress-bar').style.width = percent + '%';
             document.getElementById('progress-text').textContent = percent + '%';
         }
 
         window.toggleCompleteEvent = (id) => {
+            let justCompleted = false;
             events = events.map(e => {
-                if(e.id === id) e.completed = !e.completed;
+                if(e.id === id) {
+                    e.completed = !e.completed;
+                    if (e.completed) justCompleted = true; 
+                }
                 return e;
             });
+            
             localStorage.setItem('scheduly_events', JSON.stringify(events));
             renderTimeline();
-            showToast(events.find(e => e.id === id).completed ? "Jadwal diselesaikan! 🎉" : "Status dibatalkan", "success");
+            
+            if (justCompleted) {
+                playSound(); // Audio trigger saat checklist ditekan
+                showToast("Jadwal diselesaikan! 🎉", "success");
+            } else {
+                showToast("Status dibatalkan", "success");
+            }
         };
 
         window.editEvent = (id) => {
