@@ -1214,7 +1214,6 @@ setInterval(checkUpcomingReminders, 15000);
 		syncTimer = setTimeout(async () => {
 			if (!currentUser) return;
 			try {
-				// Pakai { merge: true } agar tidak menimpa token fcm yang sudah tersimpan
 				await setDoc(doc(db, "users", currentUser.uid), {
 					events: window.events,
 					lastUpdated: new Date().getTime()
@@ -1228,8 +1227,9 @@ setInterval(checkUpcomingReminders, 15000);
 
 	import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 	import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-	import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-	import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-messaging.js"; // <-- IMPORT BARU
+    // [PENTING] Tambahkan enableIndexedDbPersistence di sini
+	import { getFirestore, enableIndexedDbPersistence, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+	import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-messaging.js"; 
 
 	const firebaseConfig = {
 	  apiKey: "AIzaSyDheNr02M_ReVweMi1hD9S4VRlnW3NqaIE",
@@ -1243,8 +1243,30 @@ setInterval(checkUpcomingReminders, 15000);
 	const app = initializeApp(firebaseConfig);
 	const auth = getAuth(app);
 	const db = getFirestore(app);
-	const messaging = getMessaging(app); // <-- INISIALISASI MESSAGING
+	const messaging = getMessaging(app); 
 	const provider = new GoogleAuthProvider();
+
+    // --- AKTIFKAN DATABASE OFFLINE FIREBASE ---
+    enableIndexedDbPersistence(db).catch((err) => {
+        if (err.code == 'failed-precondition') {
+            console.warn("Fitur offline hanya bisa berjalan di satu tab browser.");
+        } else if (err.code == 'unimplemented') {
+            console.warn("Browser ini tidak mendukung fitur database offline.");
+        }
+    });
+
+    // --- DAFTARKAN SERVICE WORKER SEJAK AWAL ---
+    let swRegistration = null;
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', async () => {
+            try {
+                swRegistration = await navigator.serviceWorker.register('/sw.js');
+                console.log('Service Worker berhasil didaftarkan untuk caching!');
+            } catch (error) {
+                console.error('Gagal mendaftarkan Service Worker:', error);
+            }
+        });
+    }
 
 	let currentUser = null;
 	let unsubscribeEvents = null;
@@ -1262,15 +1284,14 @@ setInterval(checkUpcomingReminders, 15000);
 		try {
 			const permission = await Notification.requestPermission();
 			if (permission === 'granted') {
-				// Daftarkan service worker secara eksplisit
-				const registration = await navigator.serviceWorker.register('/sw.js');
-				
 				showToast("Membuat jalur koneksi ke server...", "success");
 				document.getElementById('noti-btn').classList.add('hidden');
 
+                // Gunakan Service Worker yang sudah diregister, atau tunggu sampai siap
+                const registration = swRegistration || await navigator.serviceWorker.ready;
+
 				// Ambil Token FCM
 				const currentToken = await getToken(messaging, { 
-					// WAJIB DIGANTI: Ambil dari Firebase Console > Project Settings > Cloud Messaging > Web Push certificates (Generate Key Pair)
 					vapidKey: 'BOtb83DGTEGgp9jDHOhW-5x16b4lX8px3AmsGruHU3s1ZuIPWjXYw-SbMzmwqMDGGifRhw9U259s5FCvQeSyu14', 
 					serviceWorkerRegistration: registration 
 				});
