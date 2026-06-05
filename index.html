@@ -518,58 +518,98 @@
             }
         }
 
-        function checkUpcomingReminders() {
-            if (!('Notification' in window) || Notification.permission !== 'granted') return;
-            
-            const now = new Date();
-            events.forEach(e => {
-                if (e.completed) return;
-                
-                const isTodayEvent = e.date === now.toISOString().split('T')[0];
-                let shouldCheck = isTodayEvent;
-                if (e.recurrence === 'daily') shouldCheck = true;
-                if (e.recurrence === 'weekly') shouldCheck = new Date(e.date).getDay() === now.getDay();
+// Gunakan key baru agar tidak bentrok dengan localstorage lama
+let advancedNotifiedEvents = JSON.parse(localStorage.getItem('scheduly_notified_v2')) || {};
 
-                if (shouldCheck) {
-                    const [eHours, eMinutes] = e.time.split(':');
-                    const eventTimeToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), eHours, eMinutes);
-                    const diffMinutes = (eventTimeToday - now) / 60000;
-                    const notiKey = `${e.id}_${now.toISOString().split('T')[0]}`;
+function checkUpcomingReminders() {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    
+    const now = new Date();
+    // Hilangkan detik untuk kalkulasi selisih menit yang lebih akurat
+    const currentExactTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes());
 
-                    if (diffMinutes > 0 && diffMinutes <= 15 && !notifiedEvents.includes(notiKey)) {
-                        
-                        if ('serviceWorker' in navigator) {
-                            navigator.serviceWorker.ready.then(registration => {
-                                registration.showNotification(`🚨 Pengingat: ${e.title}`, {
-                                    body: `Agenda ini akan dimulai dalam ${Math.round(diffMinutes)} menit. Segera bersiap!`,
-                                    icon: 'https://cdn-icons-png.flaticon.com/512/8336/8336048.png',
-                                    badge: 'https://cdn-icons-png.flaticon.com/512/8336/8336048.png',
-                                    vibrate: [300, 100, 300, 100, 300, 100, 1000],
-                                    requireInteraction: true,
-                                    data: { url: window.location.href, id: e.id },
-                                    actions: [
-                                        { action: 'buka', title: '📱 Buka Scheduly' },
-                                        { action: 'selesai', title: '✅ Tandai Selesai' }
-                                    ]
-                                });
-                            });
-                        } else {
-                            new Notification(`🚨 Pengingat: ${e.title}`, {
-                                body: `Akan dimulai dalam ${Math.round(diffMinutes)} menit!`
-                            });
-                        }
-
-                        // DI-UPGRADE: Membunyikan Alarm Kencang berulang saat tab dibuka
-                        playAlarm(`🚨 Agenda Mendekat!`, `Jadwal "${e.title}" akan dimulai dalam ${Math.round(diffMinutes)} menit. Segera bersiap-siap!`);
-
-                        notifiedEvents.push(notiKey);
-                        localStorage.setItem('scheduly_notified', JSON.stringify(notifiedEvents));
-                    }
-                }
-            });
-        }
+    events.forEach(e => {
+        if (e.completed) return;
         
-        setInterval(checkUpcomingReminders, 10000);
+        const isTodayEvent = e.date === now.toISOString().split('T')[0];
+        let shouldCheck = isTodayEvent;
+        if (e.recurrence === 'daily') shouldCheck = true;
+        if (e.recurrence === 'weekly') shouldCheck = new Date(e.date).getDay() === now.getDay();
+
+        if (shouldCheck) {
+            const [eHours, eMinutes] = e.time.split(':');
+            const eventExactTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), eHours, eMinutes);
+            
+            // Hitung selisih dalam angka bulat (menit)
+            const diffMinutes = (eventExactTime.getTime() - currentExactTime.getTime()) / 60000;
+            const notiKey = `${e.id}_${now.toISOString().split('T')[0]}`;
+
+            // Siapkan array history untuk jadwal ini jika belum ada
+            if (!advancedNotifiedEvents[notiKey]) {
+                advancedNotifiedEvents[notiKey] = [];
+            }
+
+            let triggerType = null;
+            let notifTitle = '';
+            let notifBody = '';
+
+            // Cek jadwal 10 menit, 5 menit, dan Tepat Waktu (0 menit)
+            if (diffMinutes === 10 && !advancedNotifiedEvents[notiKey].includes('10')) {
+                triggerType = '10';
+                notifTitle = `⏳ Persiapan: ${e.title}`;
+                notifBody = `Agenda ini akan dimulai dalam 10 menit.`;
+            } else if (diffMinutes === 5 && !advancedNotifiedEvents[notiKey].includes('5')) {
+                triggerType = '5';
+                notifTitle = `🚨 Segera Mulai: ${e.title}`;
+                notifBody = `Bersiaplah! Agenda ini dimulai dalam 5 menit.`;
+            } else if (diffMinutes === 0 && !advancedNotifiedEvents[notiKey].includes('0')) {
+                triggerType = '0';
+                notifTitle = `▶️ Waktunya: ${e.title}`;
+                notifBody = `Agenda sedang berlangsung sekarang!`;
+            }
+
+            // Jika masuk ke salah satu kondisi waktu di atas
+            if (triggerType !== null) {
+                // Simpan ke history agar tidak berulang di menit yang sama
+                advancedNotifiedEvents[notiKey].push(triggerType);
+                localStorage.setItem('scheduly_notified_v2', JSON.stringify(advancedNotifiedEvents));
+
+                const notifOptions = {
+                    body: notifBody,
+                    icon: 'https://cdn-icons-png.flaticon.com/512/8336/8336048.png',
+                    badge: 'https://cdn-icons-png.flaticon.com/512/8336/8336048.png',
+                    vibrate: [500, 250, 500, 250, 500, 250, 1000], // Getaran lebih agresif
+                    requireInteraction: true, // Notif tidak hilang sendiri
+                    priority: 'high', // Paksa prioritas tinggi di Android/iOS
+                    data: { url: window.location.href, id: e.id },
+                    actions: [
+                        { action: 'buka', title: '📱 Buka Scheduly' },
+                        { action: 'selesai', title: '✅ Tandai Selesai' }
+                    ]
+                };
+
+                // Munculkan System Notification
+                if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.ready.then(registration => {
+                        registration.showNotification(notifTitle, notifOptions);
+                    });
+                } else {
+                    new Notification(notifTitle, notifOptions);
+                }
+
+                // Bunyikan Alarm pop-up di layar HANYA saat jadwal tepat waktu (0 menit)
+                // Kamu bisa ganti kondisinya jika ingin alarm bunyi di 5/10 menit juga
+                if (triggerType === '0') {
+                    playAlarm(notifTitle, notifBody);
+                }
+            }
+        }
+    });
+}
+
+// Timer dicek setiap 15 detik untuk menghemat memori dibanding 10 detik
+setInterval(checkUpcomingReminders, 15000);
+
 
         function switchMainView(view) {
             activeView = view;
