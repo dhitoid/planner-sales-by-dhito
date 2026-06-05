@@ -933,7 +933,15 @@
                     if (e.recurrence === 'daily') return true;
                     if (e.recurrence === 'weekly') return new Date(e.date).getDay() === new Date(day.dateString).getDay();
                     return false;
-                }).sort((a, b) => a.time.localeCompare(b.time));
+                })// Ganti bagian .sort() di dalam renderTimeline menjadi:
+.sort((a, b) => {
+    // 1. Prioritas utama: Kategori "penting" selalu di atas
+    if (a.category === 'penting' && b.category !== 'penting') return -1;
+    if (b.category === 'penting' && a.category !== 'penting') return 1;
+    
+    // 2. Jika sama, urutkan berdasarkan waktu
+    return a.time.localeCompare(b.time);
+});
 
                 if ((searchQuery !== '' || activeCategoryFilter !== 'all') && dayEvents.length === 0) return;
 
@@ -1060,6 +1068,11 @@
             if(activeView === 'calendar') renderMonthlyCalendar(); else renderTimeline();
             showToast("Jadwal ditambahkan!");
         });
+        
+        window.addEventListener('online', () => {
+    showToast("Internet kembali terhubung, sinkronisasi dimulai...", "success");
+    window.syncToCloud(); // Paksakan sinkronisasi saat kembali online
+});
 
         window.confirmDelete = (id) => {
             const isDark = document.documentElement.classList.contains('dark');
@@ -1092,6 +1105,32 @@
     </script>
     
 <script type="module">
+    // Tambahkan di dalam <script type="module">
+let syncTimer = null;
+window.syncToCloudDebounced = async () => {
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(async () => {
+        if (!currentUser) return;
+        try {
+            await setDoc(doc(db, "users", currentUser.uid), {
+                events: window.events,
+                lastUpdated: new Date().getTime()
+            });
+            console.log("Cloud synchronized successfully.");
+        } catch (e) {
+            console.error("Gagal sinkron ke cloud", e);
+        }
+    }, 1000); // Tunggu 1 detik jeda setelah aksi terakhir
+};
+
+// Ubah override localStorage menjadi:
+localStorage.setItem = function(key, value) {
+    originalSetItem.apply(this, arguments);
+    if (key === 'scheduly_events') {
+        window.syncToCloudDebounced(); // Gunakan versi debounced
+    }
+};
+
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
     // 1. Ganti getDoc dengan onSnapshot untuk fitur real-time
