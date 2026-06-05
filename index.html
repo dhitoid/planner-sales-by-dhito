@@ -316,18 +316,47 @@
         </div>
     </footer>
 
+    <audio id="alarmSound" src="https://cdn.pixabay.com/download/audio/2021/10/25/audio_51d454378f.mp3?filename=alarm-clock-short-6402.mp3" preload="auto" loop></audio>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js').catch(err => console.log(err));
         }
 
-        // ================= NEW: AUDIO EFFECTS =================
-        // Menambahkan sound feedback kecil saat tugas selesai
+        // ================= NEW: AUDIO EFFECTS & ALARM SYSTEM =================
         const successSound = new Audio('https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c1539c.mp3?filename=success-1-6297.mp3');
+        const alarmAudio = document.getElementById('alarmSound');
+
         function playSound() {
             successSound.volume = 0.4;
             successSound.play().catch(e => console.log('Audio diputar setelah interaksi user'));
+        }
+
+        function playAlarm(title, message) {
+            alarmAudio.currentTime = 0;
+            alarmAudio.play().catch(e => console.log('Autoplay ditahan browser sampai user berinteraksi'));
+
+            const isDark = document.documentElement.classList.contains('dark');
+            Swal.fire({
+                title: title,
+                text: message,
+                icon: 'warning',
+                background: isDark ? '#1e293b' : '#ffffff',
+                color: isDark ? '#ffffff' : '#0f172a',
+                confirmButtonColor: '#4f46e5',
+                confirmButtonText: 'Matikan Alarm 🔕',
+                allowOutsideClick: false,
+                allowEscapeKey: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    stopAlarm();
+                }
+            });
+        }
+
+        function stopAlarm() {
+            alarmAudio.pause();
+            alarmAudio.currentTime = 0;
         }
 
         window.events = JSON.parse(localStorage.getItem('scheduly_events')) || [];
@@ -362,7 +391,6 @@
         // ================= NEW: FETCH WEATHER API =================
         async function fetchWeather() {
             try {
-                // Menggunakan titik kordinat Jakarta sebagai default jika geolokasi ditolak
                 const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-6.2088&longitude=106.8456&current_weather=true');
                 const data = await res.json();
                 document.getElementById('weather-temp').innerHTML = `
@@ -375,7 +403,6 @@
             }
         }
 
-        // Daftar Quotes Motivasi
         const quotes = [
             "Fokuslah pada langkah di depanmu, bukan seluruh tangga yang harus kamu daki.",
             "Rahasia dari maju ke depan adalah memulai. – Mark Twain",
@@ -385,14 +412,13 @@
         ];
 
         window.addEventListener('DOMContentLoaded', () => {
-            // Set Quote Acak
             document.getElementById('quote-text').textContent = `"${quotes[Math.floor(Math.random() * quotes.length)]}"`;
             
             setTimeout(() => {
                 const skeleton = document.getElementById('skeleton-screen');
                 skeleton.className = "fixed inset-0 z-[100] bg-slate-50 dark:bg-slate-900 p-6 space-y-6 transition-all duration-500 opacity-0 pointer-events-none";
                 checkNotificationState();
-                fetchWeather(); // Panggil API Cuaca setelah loading
+                fetchWeather();
             }, 1200);
             updatePomoDisplay();
         });
@@ -419,10 +445,10 @@
                     updatePomoDisplay();
                     if (pomoTime <= 0) {
                         clearInterval(pomoInterval);
-                        playSound(); 
-                        showToast("Sesi Pomodoro Selesai! Saatnya istirahat.", "success");
                         
-                        // UPGRADE: Pomodoro High Priority Notification
+                        // DI-UPGRADE: Menggunakan Alarm Kencang berulang
+                        playAlarm('🍅 Pomodoro Selesai!', 'Kerja bagus! Sesi fokus berakhir. Waktunya ambil istirahat sebentar agar pikiran segar kembali.');
+                        
                         if ('serviceWorker' in navigator && Notification.permission === 'granted') {
                             navigator.serviceWorker.ready.then(reg => {
                                 reg.showNotification('🍅 Pomodoro Selesai!', {
@@ -471,7 +497,6 @@
             };
         };
 
-
         function checkNotificationState() {
             const notiBtn = document.getElementById('noti-btn');
             if ('Notification' in window && Notification.permission === 'default') {
@@ -485,7 +510,6 @@
                     if (permission === 'granted') {
                         showToast("Sistem Pengingat Aktif!", "success");
                         document.getElementById('noti-btn').classList.add('hidden');
-                        // Daftarkan ulang Service Worker untuk memastikan siap mengirim push
                         if ('serviceWorker' in navigator) {
                             navigator.serviceWorker.register('sw.js');
                         }
@@ -512,18 +536,16 @@
                     const diffMinutes = (eventTimeToday - now) / 60000;
                     const notiKey = `${e.id}_${now.toISOString().split('T')[0]}`;
 
-                    // Cek jika acara dimulai dalam 15 menit dan belum dinotifikasi
                     if (diffMinutes > 0 && diffMinutes <= 15 && !notifiedEvents.includes(notiKey)) {
                         
-                        // UPGRADE: Kirim via Service Worker dengan Prioritas Tinggi
                         if ('serviceWorker' in navigator) {
                             navigator.serviceWorker.ready.then(registration => {
                                 registration.showNotification(`🚨 Pengingat: ${e.title}`, {
                                     body: `Agenda ini akan dimulai dalam ${Math.round(diffMinutes)} menit. Segera bersiap!`,
-                                    icon: 'https://cdn-icons-png.flaticon.com/512/8336/8336048.png', // Bisa diganti icon logomu
+                                    icon: 'https://cdn-icons-png.flaticon.com/512/8336/8336048.png',
                                     badge: 'https://cdn-icons-png.flaticon.com/512/8336/8336048.png',
-                                    vibrate: [300, 100, 300, 100, 300, 100, 1000], // Getaran agresif (SOS pattern)
-                                    requireInteraction: true, // Notif tidak akan hilang otomatis (PRIORITAS)
+                                    vibrate: [300, 100, 300, 100, 300, 100, 1000],
+                                    requireInteraction: true,
                                     data: { url: window.location.href, id: e.id },
                                     actions: [
                                         { action: 'buka', title: '📱 Buka Scheduly' },
@@ -532,14 +554,13 @@
                                 });
                             });
                         } else {
-                            // Fallback jika SW gagal
                             new Notification(`🚨 Pengingat: ${e.title}`, {
                                 body: `Akan dimulai dalam ${Math.round(diffMinutes)} menit!`
                             });
                         }
 
-                        // Mainkan suara peringatan jika tab sedang terbuka
-                        playSound();
+                        // DI-UPGRADE: Membunyikan Alarm Kencang berulang saat tab dibuka
+                        playAlarm(`🚨 Agenda Mendekat!`, `Jadwal "${e.title}" akan dimulai dalam ${Math.round(diffMinutes)} menit. Segera bersiap-siap!`);
 
                         notifiedEvents.push(notiKey);
                         localStorage.setItem('scheduly_notified', JSON.stringify(notifiedEvents));
@@ -548,7 +569,6 @@
             });
         }
         
-        // Mempercepat interval pengecekan agar lebih presisi (setiap 10 detik)
         setInterval(checkUpcomingReminders, 10000);
 
         function switchMainView(view) {
@@ -630,7 +650,7 @@
             renderTimeline();
             
             if (justCompleted) {
-                playSound(); // Audio trigger saat checklist ditekan
+                playSound();
                 showToast("Jadwal diselesaikan! 🎉", "success");
             } else {
                 showToast("Status dibatalkan", "success");
@@ -973,15 +993,12 @@
                     if (e.recurrence === 'daily') return true;
                     if (e.recurrence === 'weekly') return new Date(e.date).getDay() === new Date(day.dateString).getDay();
                     return false;
-                })// Ganti bagian .sort() di dalam renderTimeline menjadi:
-.sort((a, b) => {
-    // 1. Prioritas utama: Kategori "penting" selalu di atas
-    if (a.category === 'penting' && b.category !== 'penting') return -1;
-    if (b.category === 'penting' && a.category !== 'penting') return 1;
-    
-    // 2. Jika sama, urutkan berdasarkan waktu
-    return a.time.localeCompare(b.time);
-});
+                })
+				.sort((a, b) => {
+					if (a.category === 'penting' && b.category !== 'penting') return -1;
+					if (b.category === 'penting' && a.category !== 'penting') return 1;
+					return a.time.localeCompare(b.time);
+				});
 
                 if ((searchQuery !== '' || activeCategoryFilter !== 'all') && dayEvents.length === 0) return;
 
@@ -1110,9 +1127,9 @@
         });
         
         window.addEventListener('online', () => {
-    showToast("Internet kembali terhubung, sinkronisasi dimulai...", "success");
-    window.syncToCloud(); // Paksakan sinkronisasi saat kembali online
-});
+			showToast("Internet kembali terhubung, sinkronisasi dimulai...", "success");
+			window.syncToCloud();
+		});
 
         window.confirmDelete = (id) => {
             const isDark = document.documentElement.classList.contains('dark');
@@ -1143,14 +1160,11 @@
         populateDateDropdown();
         renderTimeline();
         
-                // Mendengarkan pesan dari Service Worker (Misal: User klik 'Selesai' di Notifikasi)
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.addEventListener('message', (event) => {
                 if (event.data && event.data.type === 'MARK_DONE') {
                     const eventId = event.data.eventId;
-                    // Panggil fungsi toggle yang sudah ada
                     window.toggleCompleteEvent(eventId);
-                    // Sinkronisasi otomatis
                     if (window.syncToCloudDebounced) {
                         window.syncToCloudDebounced();
                     }
@@ -1160,138 +1174,119 @@
     </script>
     
 <script type="module">
-    // Tambahkan di dalam <script type="module">
-let syncTimer = null;
-window.syncToCloudDebounced = async () => {
-    clearTimeout(syncTimer);
-    syncTimer = setTimeout(async () => {
-        if (!currentUser) return;
-        try {
-            await setDoc(doc(db, "users", currentUser.uid), {
-                events: window.events,
-                lastUpdated: new Date().getTime()
-            });
-            console.log("Cloud synchronized successfully.");
-        } catch (e) {
-            console.error("Gagal sinkron ke cloud", e);
-        }
-    }, 1000); // Tunggu 1 detik jeda setelah aksi terakhir
-};
+	let syncTimer = null;
+	window.syncToCloudDebounced = async () => {
+		clearTimeout(syncTimer);
+		syncTimer = setTimeout(async () => {
+			if (!currentUser) return;
+			try {
+				await setDoc(doc(db, "users", currentUser.uid), {
+					events: window.events,
+					lastUpdated: new Date().getTime()
+				});
+				console.log("Cloud synchronized successfully.");
+			} catch (e) {
+				console.error("Gagal sinkron ke cloud", e);
+			}
+		}, 1000);
+	};
 
-// Ubah override localStorage menjadi:
-localStorage.setItem = function(key, value) {
-    originalSetItem.apply(this, arguments);
-    if (key === 'scheduly_events') {
-        window.syncToCloudDebounced(); // Gunakan versi debounced
-    }
-};
+	import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+	import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+	import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-    // 1. Ganti getDoc dengan onSnapshot untuk fitur real-time
-    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+	const firebaseConfig = {
+	  apiKey: "AIzaSyDheNr02M_ReVweMi1hD9S4VRlnW3NqaIE",
+	  authDomain: "scheduly-pro.firebaseapp.com",
+	  projectId: "scheduly-pro",
+	  storageBucket: "scheduly-pro.firebasestorage.app",
+	  messagingSenderId: "792259340926",
+	  appId: "1:792259340926:web:a675394c4b76801bba062f"
+	};
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDheNr02M_ReVweMi1hD9S4VRlnW3NqaIE",
-      authDomain: "scheduly-pro.firebaseapp.com",
-      projectId: "scheduly-pro",
-      storageBucket: "scheduly-pro.firebasestorage.app",
-      messagingSenderId: "792259340926",
-      appId: "1:792259340926:web:a675394c4b76801bba062f"
-    };
+	const app = initializeApp(firebaseConfig);
+	const auth = getAuth(app);
+	const db = getFirestore(app);
+	const provider = new GoogleAuthProvider();
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const provider = new GoogleAuthProvider();
+	let currentUser = null;
+	let unsubscribeEvents = null;
 
-    let currentUser = null;
-    let unsubscribeEvents = null; // Menyimpan fungsi pembatalan listener real-time
+	const originalSetItem = localStorage.setItem;
 
-    // Amankan fungsi asli localStorage ke scope paling atas modul
-    const originalSetItem = localStorage.setItem;
+	const loginScreen = document.getElementById('login-screen');
+	const btnLogin = document.getElementById('btn-login-google');
+	const btnLogout = document.getElementById('btn-logout');
 
-    // Elemen UI Firebase
-    const loginScreen = document.getElementById('login-screen');
-    const btnLogin = document.getElementById('btn-login-google');
-    const btnLogout = document.getElementById('btn-logout');
+	window.syncToCloud = async () => {
+		if (!currentUser) return;
+		try {
+			await setDoc(doc(db, "users", currentUser.uid), {
+				events: window.events
+			});
+		} catch (e) {
+			console.error("Gagal sinkron ke cloud", e);
+		}
+	};
 
-    // Fungsi sinkronisasi ke cloud saat ada perubahan data lokal
-    window.syncToCloud = async () => {
-        if (!currentUser) return;
-        try {
-            await setDoc(doc(db, "users", currentUser.uid), {
-                events: window.events
-            });
-        } catch (e) {
-            console.error("Gagal sinkron ke cloud", e);
-        }
-    };
+	const listenToCloud = (uid) => {
+		if (unsubscribeEvents) unsubscribeEvents();
 
-    // 2. REVISI: Menggunakan onSnapshot agar sinkron otomatis secara Real-Time
-    const listenToCloud = (uid) => {
-        if (unsubscribeEvents) unsubscribeEvents(); // Bersihkan listener lama jika ada
+		const docRef = doc(db, "users", uid);
+		unsubscribeEvents = onSnapshot(docRef, (docSnap) => {
+			if (docSnap.exists() && docSnap.data().events) {
+				window.events = docSnap.data().events;
+				
+				originalSetItem.call(localStorage, 'scheduly_events', JSON.stringify(window.events));
+				
+				if (window.activeView === 'calendar') {
+					if (typeof window.renderMonthlyCalendar === 'function') window.renderMonthlyCalendar(); 
+				} else {
+					if (typeof window.renderTimeline === 'function') window.renderTimeline();
+				}
+			}
+		}, (error) => {
+			console.error("Gagal mendengarkan perubahan data cloud:", error);
+		});
+	};
 
-        const docRef = doc(db, "users", uid);
-        unsubscribeEvents = onSnapshot(docRef, (docSnap) => {
-            if (docSnap.exists() && docSnap.data().events) {
-                window.events = docSnap.data().events;
-                
-                // Gunakan originalSetItem agar tidak memicu loop tak berujung ke cloud
-                originalSetItem.call(localStorage, 'scheduly_events', JSON.stringify(window.events));
-                
-                // Panggil ulang render dari script utama agar UI langsung berubah
-                if (window.activeView === 'calendar') {
-                    if (typeof window.renderMonthlyCalendar === 'function') window.renderMonthlyCalendar(); 
-                } else {
-                    if (typeof window.renderTimeline === 'function') window.renderTimeline();
-                }
-            }
-        }, (error) => {
-            console.error("Gagal mendengarkan perubahan data cloud:", error);
-        });
-    };
+	onAuthStateChanged(auth, (user) => {
+		if (user) {
+			currentUser = user;
+			loginScreen.classList.add('hidden');
+			btnLogout.classList.remove('hidden');
+			
+			showToast(`Selamat datang, ${user.displayName}!`, "success");
+			listenToCloud(user.uid);
+		} else {
+			currentUser = null;
+			loginScreen.classList.remove('hidden');
+			btnLogout.classList.add('hidden');
+			if (unsubscribeEvents) unsubscribeEvents();
+		}
+	});
 
-    // Listener Status Login
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            currentUser = user;
-            loginScreen.classList.add('hidden');
-            btnLogout.classList.remove('hidden');
-            
-            showToast(`Selamat datang, ${user.displayName}!`, "success");
-            listenToCloud(user.uid); // Mulai dengerin data secara real-time
-        } else {
-            currentUser = null;
-            loginScreen.classList.remove('hidden');
-            btnLogout.classList.add('hidden');
-            if (unsubscribeEvents) unsubscribeEvents(); // Matikan listener jika logout
-        }
-    });
+	btnLogin.addEventListener('click', () => {
+		signInWithPopup(auth, provider).catch((error) => {
+			showToast("Gagal Login: " + error.message, "error");
+		});
+	});
 
-    // Event Klik Login & Logout
-    btnLogin.addEventListener('click', () => {
-        signInWithPopup(auth, provider).catch((error) => {
-            showToast("Gagal Login: " + error.message, "error");
-        });
-    });
+	btnLogout.addEventListener('click', () => {
+		signOut(auth).then(() => {
+			window.events = [];
+			localStorage.removeItem('scheduly_events');
+			window.renderTimeline();
+			showToast("Berhasil Keluar", "success");
+		});
+	});
 
-    btnLogout.addEventListener('click', () => {
-        signOut(auth).then(() => {
-            window.events = [];
-            localStorage.removeItem('scheduly_events');
-            window.renderTimeline();
-            showToast("Berhasil Keluar", "success");
-        });
-    });
-
-    // --- OVERRIDE STORAGE LAMA KE CLOUD ---
-    localStorage.setItem = function(key, value) {
-        originalSetItem.apply(this, arguments);
-        if (key === 'scheduly_events') {
-            window.syncToCloud();
-        }
-    };
+	localStorage.setItem = function(key, value) {
+		originalSetItem.apply(this, arguments);
+		if (key === 'scheduly_events') {
+			window.syncToCloudDebounced();
+		}
+	};
 </script>
 
 </body>
