@@ -1277,9 +1277,12 @@ setInterval(checkUpcomingReminders, 15000);
 	const btnLogin = document.getElementById('btn-login-google');
 	const btnLogout = document.getElementById('btn-logout');
 
-	// --- FUNGSI MINTA PERMISSION & TOKEN BARU ---
+	// --- FUNGSI MINTA PERMISSION & TOKEN BARU (Diperbarui untuk iOS) ---
 	window.requestNotificationPermission = async () => {
-		if (!('Notification' in window)) return;
+		if (!('Notification' in window)) {
+            alert("Perangkat atau browser ini belum mendukung notifikasi web.");
+            return;
+        }
 
 		try {
 			const permission = await Notification.requestPermission();
@@ -1287,8 +1290,9 @@ setInterval(checkUpcomingReminders, 15000);
 				showToast("Membuat jalur koneksi ke server...", "success");
 				document.getElementById('noti-btn').classList.add('hidden');
 
-                // Gunakan Service Worker yang sudah diregister, atau tunggu sampai siap
-                const registration = swRegistration || await navigator.serviceWorker.ready;
+                // [PERBAIKAN iOS]: Panggil dan pastikan ulang Service Worker secara eksplisit
+                const registration = await navigator.serviceWorker.register('/sw.js');
+                await navigator.serviceWorker.ready; // Wajib tunggu sampai siap di iOS
 
 				// Ambil Token FCM
 				const currentToken = await getToken(messaging, { 
@@ -1304,12 +1308,16 @@ setInterval(checkUpcomingReminders, 15000);
 					console.log("Token FCM berhasil disimpan:", currentToken);
 					showToast("Sistem Pengingat Server Aktif!", "success");
 				} else {
-					console.log('Tidak bisa mendapatkan token atau user belum login.');
+					showToast("Gagal: Harus login terlebih dahulu.", "error");
 				}
-			}
+			} else {
+                showToast("Izin notifikasi ditolak oleh perangkat.", "error");
+            }
 		} catch (error) {
 			console.error('Terjadi error saat mengambil token:', error);
-			showToast("Gagal menghubungkan notifikasi ke server.", "error");
+            // [DEBUGGING iOS]: Gunakan alert agar error dari Safari terlihat jelas di HP
+            alert("Gagal sistem iOS: " + error.message);
+			showToast("Gagal menghubungkan: " + error.message, "error");
 		}
 	};
 
