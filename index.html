@@ -419,10 +419,18 @@
                     updatePomoDisplay();
                     if (pomoTime <= 0) {
                         clearInterval(pomoInterval);
-                        playSound(); // Mainkan suara saat selesai
+                        playSound(); 
                         showToast("Sesi Pomodoro Selesai! Saatnya istirahat.", "success");
-                        if ('Notification' in window && Notification.permission === 'granted') {
-                            new Notification('Scheduly Pro', { body: 'Waktu Pomodoro habis! Ambil istirahat sebentar.' });
+                        
+                        // UPGRADE: Pomodoro High Priority Notification
+                        if ('serviceWorker' in navigator && Notification.permission === 'granted') {
+                            navigator.serviceWorker.ready.then(reg => {
+                                reg.showNotification('🍅 Pomodoro Selesai!', {
+                                    body: 'Kerja bagus! Waktunya ambil istirahat sebentar agar tetap fokus.',
+                                    vibrate: [500, 200, 500, 200, 500],
+                                    requireInteraction: true
+                                });
+                            });
                         }
                         resetPomodoro();
                     }
@@ -477,6 +485,10 @@
                     if (permission === 'granted') {
                         showToast("Sistem Pengingat Aktif!", "success");
                         document.getElementById('noti-btn').classList.add('hidden');
+                        // Daftarkan ulang Service Worker untuk memastikan siap mengirim push
+                        if ('serviceWorker' in navigator) {
+                            navigator.serviceWorker.register('sw.js');
+                        }
                     }
                 });
             }
@@ -484,6 +496,7 @@
 
         function checkUpcomingReminders() {
             if (!('Notification' in window) || Notification.permission !== 'granted') return;
+            
             const now = new Date();
             events.forEach(e => {
                 if (e.completed) return;
@@ -499,17 +512,44 @@
                     const diffMinutes = (eventTimeToday - now) / 60000;
                     const notiKey = `${e.id}_${now.toISOString().split('T')[0]}`;
 
+                    // Cek jika acara dimulai dalam 15 menit dan belum dinotifikasi
                     if (diffMinutes > 0 && diffMinutes <= 15 && !notifiedEvents.includes(notiKey)) {
-                        new Notification(`Pengingat: Scheduly Pro`, {
-                            body: `Acara "${e.title}" akan dimulai dalam ${Math.round(diffMinutes)} menit lagi!`
-                        });
+                        
+                        // UPGRADE: Kirim via Service Worker dengan Prioritas Tinggi
+                        if ('serviceWorker' in navigator) {
+                            navigator.serviceWorker.ready.then(registration => {
+                                registration.showNotification(`🚨 Pengingat: ${e.title}`, {
+                                    body: `Agenda ini akan dimulai dalam ${Math.round(diffMinutes)} menit. Segera bersiap!`,
+                                    icon: 'https://cdn-icons-png.flaticon.com/512/8336/8336048.png', // Bisa diganti icon logomu
+                                    badge: 'https://cdn-icons-png.flaticon.com/512/8336/8336048.png',
+                                    vibrate: [300, 100, 300, 100, 300, 100, 1000], // Getaran agresif (SOS pattern)
+                                    requireInteraction: true, // Notif tidak akan hilang otomatis (PRIORITAS)
+                                    data: { url: window.location.href, id: e.id },
+                                    actions: [
+                                        { action: 'buka', title: '📱 Buka Scheduly' },
+                                        { action: 'selesai', title: '✅ Tandai Selesai' }
+                                    ]
+                                });
+                            });
+                        } else {
+                            // Fallback jika SW gagal
+                            new Notification(`🚨 Pengingat: ${e.title}`, {
+                                body: `Akan dimulai dalam ${Math.round(diffMinutes)} menit!`
+                            });
+                        }
+
+                        // Mainkan suara peringatan jika tab sedang terbuka
+                        playSound();
+
                         notifiedEvents.push(notiKey);
                         localStorage.setItem('scheduly_notified', JSON.stringify(notifiedEvents));
                     }
                 }
             });
         }
-        setInterval(checkUpcomingReminders, 30000);
+        
+        // Mempercepat interval pengecekan agar lebih presisi (setiap 10 detik)
+        setInterval(checkUpcomingReminders, 10000);
 
         function switchMainView(view) {
             activeView = view;
@@ -1102,6 +1142,21 @@
         generatedDays = generateDaysArray(currentDays);
         populateDateDropdown();
         renderTimeline();
+        
+                // Mendengarkan pesan dari Service Worker (Misal: User klik 'Selesai' di Notifikasi)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener('message', (event) => {
+                if (event.data && event.data.type === 'MARK_DONE') {
+                    const eventId = event.data.eventId;
+                    // Panggil fungsi toggle yang sudah ada
+                    window.toggleCompleteEvent(eventId);
+                    // Sinkronisasi otomatis
+                    if (window.syncToCloudDebounced) {
+                        window.syncToCloudDebounced();
+                    }
+                }
+            });
+        }
     </script>
     
 <script type="module">
