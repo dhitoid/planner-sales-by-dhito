@@ -2,15 +2,13 @@
 importScripts('https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.8.1/firebase-messaging-compat.js');
 
-const CACHE_NAME = 'scheduly-cache-v2';
+const CACHE_NAME = 'scheduly-cache-v3'; // Naikkan versi cache agar up-to-date
+// Hapus CDN eksternal dari sini agar instalasi Service Worker lebih stabil
 const ASSETS = [
   '/', 
   'index.html',
   'manifest.json',
-  'https://cdn.tailwindcss.com',
-  'https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css',
-  'https://cdn.jsdelivr.net/npm/sweetalert2@11',
-  'https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js'
+  '/icon.png' // Pastikan kamu punya file ini
 ];
 
 // Inisialisasi Firebase
@@ -29,10 +27,10 @@ const messaging = firebase.messaging();
 // --- 1. LOGIKA FIREBASE MESSAGING (BACKGROUND) ---
 messaging.onBackgroundMessage((payload) => {
   console.log('[sw.js] Menerima pesan background: ', payload);
-  const notificationTitle = payload.notification.title;
+  const notificationTitle = payload.notification.title || 'Pengingat Scheduly';
   const notificationOptions = {
-    body: payload.notification.body,
-    icon: '/icon.png', // Sesuaikan path icon kamu
+    body: payload.notification.body || 'Kamu punya jadwal baru!',
+    icon: '/icon.png', 
     data: { id: payload.data?.id, url: payload.data?.url || '/' }
   };
 
@@ -58,16 +56,38 @@ self.addEventListener('activate', (e) => {
   );
 });
 
-// --- 4. EVENT FETCH ---
+// --- 4. EVENT FETCH (STRATEGI NETWORK-FIRST) ---
 self.addEventListener('fetch', (e) => {
-  e.respondWith(caches.match(e.request).then((response) => response || fetch(e.request)));
+  // Hanya proses request GET. Biarkan POST/PUT lewat.
+  if (e.request.method !== 'GET') return;
+
+  // JANGAN cache request ke database Firebase agar fitur offline mereka bekerja
+  if (e.request.url.includes('firestore.googleapis.com') || e.request.url.includes('firebaseio.com')) {
+    return;
+  }
+
+  e.respondWith(
+    fetch(e.request)
+      .then((response) => {
+        // Jika jaringan sukses, simpan/update ke cache untuk dipakai saat offline
+        const responseClone = response.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(e.request, responseClone);
+        });
+        return response;
+      })
+      .catch(() => {
+        // Jika offline, ambil dari cache
+        return caches.match(e.request);
+      })
+  );
 });
 
 // --- 5. EVENT NOTIFICATIONCLICK ---
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
     const action = event.action;
-    const notificationData = event.notification.data;
+    const notificationData = event.notification.data || {};
 
     if (action === 'selesai') {
         event.waitUntil(
