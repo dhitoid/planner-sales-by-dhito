@@ -51,7 +51,7 @@
 </head>
 <body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-300">
     
-    <div id="login-screen" class="fixed inset-0 z-[200] bg-slate-900 flex flex-col items-center justify-center p-6 transition-opacity duration-500">
+    <div id="login-screen" class="hidden fixed inset-0 z-[200] bg-slate-900 flex-col items-center justify-center p-6 transition-opacity duration-500"> 
     <div class="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-2xl max-w-md w-full text-center space-y-6">
         <div class="inline-block bg-gradient-to-tr from-indigo-600 to-violet-500 p-4 rounded-2xl mb-2">
             <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
@@ -547,8 +547,12 @@ function checkUpcomingReminders() {
             let notifTitle = '';
             let notifBody = '';
 
-            // Cek jadwal 10 menit, 5 menit, dan Tepat Waktu (0 menit)
-            if (diffMinutes === 10 && !advancedNotifiedEvents[notiKey].includes('10')) {
+            // CEK JADWAL: 15 Menit, 10 Menit, 5 Menit, dan Tepat Waktu (0 Menit)
+            if (diffMinutes === 15 && !advancedNotifiedEvents[notiKey].includes('15')) {
+                triggerType = '15';
+                notifTitle = `⏳ Persiapan Awal: ${e.title}`;
+                notifBody = `Agenda ini akan dimulai dalam 15 menit.`;
+            } else if (diffMinutes === 10 && !advancedNotifiedEvents[notiKey].includes('10')) {
                 triggerType = '10';
                 notifTitle = `⏳ Persiapan: ${e.title}`;
                 notifBody = `Agenda ini akan dimulai dalam 10 menit.`;
@@ -572,9 +576,9 @@ function checkUpcomingReminders() {
                     body: notifBody,
                     icon: 'https://cdn-icons-png.flaticon.com/512/8336/8336048.png',
                     badge: 'https://cdn-icons-png.flaticon.com/512/8336/8336048.png',
-                    vibrate: [500, 250, 500, 250, 500, 250, 1000], // Getaran lebih agresif
-                    requireInteraction: true, // Notif tidak hilang sendiri
-                    priority: 'high', // Paksa prioritas tinggi di Android/iOS
+                    vibrate: [500, 250, 500, 250, 500, 250, 1000],
+                    requireInteraction: true,
+                    priority: 'high',
                     data: { url: window.location.href, id: e.id },
                     actions: [
                         { action: 'buka', title: '📱 Buka Scheduly' },
@@ -582,17 +586,16 @@ function checkUpcomingReminders() {
                     ]
                 };
 
-// Munculkan System Notification (Mobile Friendly)
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.ready.then(registration => {
-        registration.showNotification(notifTitle, notifOptions);
-    });
-} else {
-    new Notification(notifTitle, notifOptions); // Fallback untuk browser lawas
-}
+                // Munculkan System Notification (Mobile Friendly) via Service Worker
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.ready.then(registration => {
+                        registration.showNotification(notifTitle, notifOptions);
+                    });
+                } else {
+                    new Notification(notifTitle, notifOptions); 
+                }
 
                 // Bunyikan Alarm pop-up di layar HANYA saat jadwal tepat waktu (0 menit)
-                // Kamu bisa ganti kondisinya jika ingin alarm bunyi di 5/10 menit juga
                 if (triggerType === '0') {
                     playAlarm(notifTitle, notifBody);
                 }
@@ -600,7 +603,6 @@ if ('serviceWorker' in navigator) {
         }
     });
 }
-
 // Timer dicek setiap 15 detik untuk menghemat memori dibanding 10 detik
 setInterval(checkUpcomingReminders, 15000);
 
@@ -1418,14 +1420,18 @@ if (currentToken) {
 	onAuthStateChanged(auth, (user) => {
 		if (user) {
 			currentUser = user;
+			// Jika login, sembunyikan pop-up login
 			loginScreen.classList.add('hidden');
+			loginScreen.classList.remove('flex');
 			btnLogout.classList.remove('hidden');
 			
 			showToast(`Selamat datang, ${user.displayName}!`, "success");
 			listenToCloud(user.uid);
 		} else {
 			currentUser = null;
+			// Jika belum login, baru munculkan pop-up login
 			loginScreen.classList.remove('hidden');
+			loginScreen.classList.add('flex');
 			btnLogout.classList.add('hidden');
 			if (unsubscribeEvents) unsubscribeEvents();
 		}
