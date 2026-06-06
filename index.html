@@ -656,19 +656,75 @@ setInterval(checkUpcomingReminders, 15000);
             renderTimeline();
         }
 
-        function updateStatsWidgets() {
-            const total = events.length;
-            const done = events.filter(e => e.completed).length;
-            const pending = total - done;
+// ================= UPGRADE: AUDIO UNLOCKER =================
+// Trik agar browser (khususnya iOS Safari) tidak memblokir autoplay alarm
+document.body.addEventListener('click', function unlockAudio() {
+    alarmAudio.play().then(() => {
+        alarmAudio.pause();
+        alarmAudio.currentTime = 0;
+    }).catch(err => console.log('Audio unlock tertunda: ', err));
+    document.body.removeEventListener('click', unlockAudio);
+}, { once: true });
 
-            document.getElementById('stat-total').textContent = total;
-            document.getElementById('stat-done').textContent = done;
-            document.getElementById('stat-pending').textContent = pending;
+// ================= UPGRADE: APP BADGING API =================
+// Memunculkan angka jumlah jadwal yang belum selesai di Ikon Aplikasi HP
+function updateStatsWidgets() {
+    const total = events.length;
+    const done = events.filter(e => e.completed).length;
+    const pending = total - done;
 
-            const percent = total === 0 ? 0 : Math.round((done / total) * 100);
-            document.getElementById('progress-bar').style.width = percent + '%';
-            document.getElementById('progress-text').textContent = percent + '%';
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-done').textContent = done;
+    document.getElementById('stat-pending').textContent = pending;
+
+    const percent = total === 0 ? 0 : Math.round((done / total) * 100);
+    document.getElementById('progress-bar').style.width = percent + '%';
+    document.getElementById('progress-text').textContent = percent + '%';
+
+    // Update App Badge
+    if ('setAppBadge' in navigator) {
+        if (pending > 0) {
+            navigator.setAppBadge(pending).catch(e => console.log('Gagal set badge', e));
+        } else {
+            navigator.clearAppBadge().catch(e => console.log('Gagal clear badge', e));
         }
+    }
+}
+
+// ================= PERBAIKAN: NOTIFIKASI iOS =================
+window.requestNotificationPermission = async () => {
+    if (!('Notification' in window)) {
+        Swal.fire('Oops', 'Perangkat ini belum mendukung notifikasi web. Pastikan kamu sudah Add to Home Screen (khusus iOS).', 'error');
+        return;
+    }
+
+    try {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+            showToast("Izin notifikasi diberikan. Sinkronisasi server...", "success");
+            document.getElementById('noti-btn').classList.add('hidden');
+
+            const registration = await navigator.serviceWorker.ready;
+            
+            const currentToken = await getToken(messaging, { 
+                vapidKey: 'BOtb83DGTEGgp9jDHOhW-5x16b4lX8px3AmsGruHU3s1ZuIPWjXYw-SbMzmwqMDGGifRhw9U259s5FCvQeSyu14', 
+                serviceWorkerRegistration: registration 
+            });
+
+            if (currentToken && currentUser) {
+                await setDoc(doc(db, "users", currentUser.uid), {
+                    fcmToken: currentToken
+                }, { merge: true });
+                showToast("Sistem Pengingat Aktif!", "success");
+            }
+        } else {
+            showToast("Izin notifikasi ditolak.", "error");
+        }
+    } catch (error) {
+        console.error('Error token:', error);
+        Swal.fire('Gagal', 'Terjadi kesalahan sistem (Jika di iOS, pastikan buka dari Home Screen): ' + error.message, 'error');
+    }
+};
 
         window.toggleCompleteEvent = (id) => {
             let justCompleted = false;
