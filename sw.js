@@ -1,7 +1,7 @@
 importScripts('https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.8.1/firebase-messaging-compat.js');
 
-const CACHE_NAME = 'scheduly-cache-v4'; 
+const CACHE_NAME = 'scheduly-cache-v5'; 
 const ASSETS = ['/', '/index.html', '/manifest.json'];
 
 const firebaseConfig = {
@@ -16,22 +16,30 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
+// Handle notifikasi saat aplikasi mati / di background / HP Terkunci
 messaging.onBackgroundMessage((payload) => {
-  const notificationTitle = payload.notification.title || 'Agenda Baru Scheduly';
+  console.log('Menerima pesan di latar belakang: ', payload);
+
+  // Ambil data dari payload (Gunakan struktur data-only agar kontrol penuh di SW)
+  const notificationTitle = payload.data?.title || payload.notification?.title || 'Agenda Baru Scheduly';
   const notificationOptions = {
-    body: payload.notification.body || 'Cek jadwalmu sekarang!',
+    body: payload.data?.body || payload.notification?.body || 'Cek jadwalmu sekarang!',
     icon: 'https://cdn-icons-png.flaticon.com/512/8336/8336048.png', 
     badge: 'https://cdn-icons-png.flaticon.com/512/8336/8336048.png',
     vibrate: [500, 250, 500, 250, 500],
-    requireInteraction: true,
-    data: { id: payload.data?.id, url: payload.data?.url || '/' },
+    requireInteraction: true, // Notifikasi tidak akan hilang sampai di-swipe/klik oleh user
+    priority: 'high',
+    data: { 
+        id: payload.data?.id, 
+        url: payload.data?.url || '/' 
+    },
     actions: [
         { action: 'buka', title: '📱 Buka Scheduly' },
         { action: 'selesai', title: '✅ Tandai Selesai' }
     ]
   };
 
-  self.registration.showNotification(notificationTitle, notificationOptions);
+  return self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
 self.addEventListener('install', (e) => {
@@ -49,18 +57,41 @@ self.addEventListener('activate', (e) => {
   );
 });
 
+// INTERCEPT FETCH: Amankan jalur API Firebase agar tidak masuk Cache Box
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
-  if (e.request.url.includes('firestore.googleapis.com') || e.request.url.includes('firebaseio.com')) return;
+  
+  const url = e.request.url;
+  // JANGAN cache request yang mengarah ke server Firebase/Google API
+  if (
+    url.includes('firestore.googleapis.com') || 
+    url.includes('firebaseio.com') ||
+    url.includes('fcmregistration.googleapis.com') ||
+    url.includes('googleapis.com') ||
+    url.includes('firebase')
+  ) {
+      return; 
+  }
 
   e.respondWith(
-    fetch(e.request)
-      .then((response) => {
+    caches.match(e.request).then((cachedResponse) => {
+      if (cachedResponse) {
+        // Kembalikan cache dulu, tapi tetap fetch di background untuk update cache berikutnya (Stale-While-Revalidate)
+        fetch(e.request).then((networkResponse) => {
+          if (networkResponse.status === 200) {
+            caches.open(CACHE_NAME).then((cache) => cache.put(e.request, networkResponse));
+          }
+        }).catch(() => {/* ignore network failure */});
+        return cachedResponse;
+      }
+
+      return fetch(e.request).then((response) => {
+        if (!response || response.status !== 200 || response.type !== 'basic') return response;
         const responseClone = response.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(e.request, responseClone));
         return response;
-      })
-      .catch(() => caches.match(e.request))
+      });
+    })
   );
 });
 
@@ -71,7 +102,8 @@ self.addEventListener('notificationclick', (event) => {
 
     if (action === 'selesai' && notificationData.id) {
         event.waitUntil(
-            self.clients.matchAll({ type: 'window' }).then((clientList) => {
+            self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+                // Kirim pesan ke dokumen aktif untuk mengubah status event menjadi selesai
                 clientList.forEach(client => client.postMessage({ type: 'MARK_DONE', eventId: notificationData.id }));
             })
         );
