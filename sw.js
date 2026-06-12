@@ -1,42 +1,34 @@
 importScripts('https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.8.1/firebase-messaging-compat.js');
 
-const CACHE_NAME = 'scheduly-cache-v5'; 
+const CACHE_NAME = 'scheduly-cache-v6'; // Naikkan versi cache
 const ASSETS = ['/', '/index.html', '/manifest.json'];
 
-const firebaseConfig = {
+firebase.initializeApp({
   apiKey: "AIzaSyDheNr02M_ReVweMi1hD9S4VRlnW3NqaIE",
   authDomain: "scheduly-pro.firebaseapp.com",
   projectId: "scheduly-pro",
   storageBucket: "scheduly-pro.firebasestorage.app",
   messagingSenderId: "792259340926",
   appId: "1:792259340926:web:a675394c4b76801bba062f"
-};
+});
 
-firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
-// Handle notifikasi saat aplikasi mati / di background / HP Terkunci
 messaging.onBackgroundMessage((payload) => {
-  console.log('Menerima pesan di latar belakang: ', payload);
+  console.log('Menerima pesan push: ', payload);
 
-  // Ambil data dari payload (Gunakan struktur data-only agar kontrol penuh di SW)
-  const notificationTitle = payload.data?.title || payload.notification?.title || 'Agenda Baru Scheduly';
+  const notificationTitle = payload.notification?.title || payload.data?.title || 'Agenda Scheduly';
   const notificationOptions = {
-    body: payload.data?.body || payload.notification?.body || 'Cek jadwalmu sekarang!',
+    body: payload.notification?.body || payload.data?.body || 'Waktunya cek jadwal Anda!',
     icon: 'https://cdn-icons-png.flaticon.com/512/8336/8336048.png', 
     badge: 'https://cdn-icons-png.flaticon.com/512/8336/8336048.png',
-    vibrate: [500, 250, 500, 250, 500],
-    requireInteraction: true, // Notifikasi tidak akan hilang sampai di-swipe/klik oleh user
-    priority: 'high',
+    vibrate: [500, 250, 500],
+    requireInteraction: true,
     data: { 
         id: payload.data?.id, 
         url: payload.data?.url || '/' 
-    },
-    actions: [
-        { action: 'buka', title: '📱 Buka Scheduly' },
-        { action: 'selesai', title: '✅ Tandai Selesai' }
-    ]
+    }
   };
 
   return self.registration.showNotification(notificationTitle, notificationOptions);
@@ -97,26 +89,21 @@ self.addEventListener('fetch', (e) => {
 
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
-    const action = event.action;
-    const notificationData = event.notification.data || {};
+    const targetUrl = event.notification.data.url || '/';
 
-    if (action === 'selesai' && notificationData.id) {
-        event.waitUntil(
-            self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-                // Kirim pesan ke dokumen aktif untuk mengubah status event menjadi selesai
-                clientList.forEach(client => client.postMessage({ type: 'MARK_DONE', eventId: notificationData.id }));
-            })
-        );
-    } else {
-        event.waitUntil(
-            clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-                for (const client of clientList) {
-                    if (client.url.includes('/') && 'focus' in client) {
-                        return client.focus();
-                    }
+    event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+            // Cek apakah ada tab yang sudah terbuka
+            for (let i = 0; i < windowClients.length; i++) {
+                const client = windowClients[i];
+                if (client.url === targetUrl && 'focus' in client) {
+                    return client.focus();
                 }
-                if (clients.openWindow) return clients.openWindow(notificationData.url || '/');
-            })
-        );
-    }
+            }
+            // Jika tidak ada, buka tab baru
+            if (clients.openWindow) {
+                return clients.openWindow(targetUrl);
+            }
+        })
+    );
 });
