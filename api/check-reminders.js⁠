@@ -1,0 +1,48 @@
+const admin = require('firebase-admin');
+
+// Inisialisasi Firebase Admin
+if (!admin.apps.length) {
+    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+}
+
+export default async function handler(req, res) {
+    const db = admin.firestore();
+    const now = new Date();
+    
+    // Ambil semua user yang memiliki fcmToken
+    const usersSnapshot = await db.collection('users').where('fcmToken', '!=', null).get();
+    
+    for (const userDoc of usersSnapshot.docs) {
+        const userData = userDoc.data();
+        const events = userData.events || [];
+        const fcmToken = userData.fcmToken;
+
+        for (const event of events) {
+            if (event.completed) continue;
+
+            // Logika pengecekan (apakah jadwal dimulai dalam 5 menit ke depan?)
+            const [hours, minutes] = event.time.split(':');
+            const eventDate = new Date(event.date);
+            eventDate.setHours(hours, minutes, 0, 0);
+
+            const diffMinutes = (eventDate - now) / 60000;
+
+            if (diffMinutes > 0 && diffMinutes <= 5) {
+                // KIRIM NOTIFIKASI VIA FCM
+                const message = {
+                    token: fcmToken,
+                    notification: {
+                        title: `⏰ Pengingat: ${event.title}`,
+                        body: `Agenda ini akan dimulai sebentar lagi!`
+                    },
+                    data: { id: event.id, url: '/' }
+                };
+                
+                await admin.messaging().send(message);
+            }
+        }
+    }
+    
+    res.status(200).json({ success: true });
+}
