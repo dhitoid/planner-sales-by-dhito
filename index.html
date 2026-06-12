@@ -1250,10 +1250,12 @@ window.requestNotificationPermission = async () => {
 		syncTimer = setTimeout(async () => {
 			if (!currentUser) return;
 			try {
-				await setDoc(doc(db, "users", currentUser.uid), {
-					events: window.events,
-					lastUpdated: new Date().getTime()
-				}, { merge: true });
+// Pastikan struktur tanggal dan jam mudah dibaca oleh server nanti
+await setDoc(doc(db, "users", currentUser.uid), {
+    fcmToken: currentToken, // Ini yang paling penting untuk Push Notif
+    events: window.events,
+    lastUpdated: new Date().getTime()
+}, { merge: true });
 				console.log("Cloud synchronized successfully.");
 			} catch (e) {
 				console.error("Gagal sinkron ke cloud", e);
