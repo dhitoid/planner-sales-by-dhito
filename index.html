@@ -658,38 +658,51 @@ function updateStatsWidgets() {
     }
 }
 
-// ================= PERBAIKAN: NOTIFIKASI iOS =================
+// ================= PERBAIKAN: NOTIFIKASI iOS & ANDROID =================
 window.requestNotificationPermission = async () => {
+    // 1. Cek dukungan browser
     if (!('Notification' in window)) {
-        Swal.fire('Oops', 'Perangkat ini belum mendukung notifikasi web. Pastikan kamu sudah Add to Home Screen (khusus iOS).', 'error');
+        Swal.fire('Oops', 'Perangkat ini belum mendukung notifikasi web. Pastikan Anda sudah "Add to Home Screen" jika menggunakan iOS.', 'error');
         return;
     }
 
     try {
+        // 2. Minta Izin
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
-            showToast("Izin notifikasi diberikan. Sinkronisasi server...", "success");
+            showToast("Meminta akses server...", "success");
             document.getElementById('noti-btn').classList.add('hidden');
 
-            const registration = await navigator.serviceWorker.ready;
-            
+            // 3. Pastikan Service Worker terdaftar dan SIAP
+            const registration = await navigator.serviceWorker.register('sw.js');
+            await navigator.serviceWorker.ready; // Wajib untuk iOS
+
+            // 4. Ambil Token FCM
             const currentToken = await getToken(messaging, { 
                 vapidKey: 'BOtb83DGTEGgp9jDHOhW-5x16b4lX8px3AmsGruHU3s1ZuIPWjXYw-SbMzmwqMDGGifRhw9U259s5FCvQeSyu14', 
                 serviceWorkerRegistration: registration 
             });
 
-            if (currentToken && currentUser) {
-                await setDoc(doc(db, "users", currentUser.uid), {
-                    fcmToken: currentToken
-                }, { merge: true });
-                showToast("Sistem Pengingat Aktif!", "success");
+            if (currentToken) {
+                console.log("FCM Token:", currentToken);
+                if (currentUser) {
+                    await setDoc(doc(db, "users", currentUser.uid), {
+                        fcmToken: currentToken,
+                        notifEnabled: true
+                    }, { merge: true });
+                    showToast("Sistem Pengingat Aktif!", "success");
+                } else {
+                    showToast("Harap login terlebih dahulu untuk menyimpan token.", "warning");
+                }
+            } else {
+                showToast("Gagal mendapatkan token notifikasi. Coba lagi.", "error");
             }
         } else {
-            showToast("Izin notifikasi ditolak.", "error");
+            Swal.fire('Izin Ditolak', 'Anda memblokir notifikasi. Izinkan melalui pengaturan browser/sistem untuk menerima pengingat.', 'warning');
         }
     } catch (error) {
         console.error('Error token:', error);
-        Swal.fire('Gagal', 'Terjadi kesalahan sistem (Jika di iOS, pastikan buka dari Home Screen): ' + error.message, 'error');
+        alert("Gagal mengaktifkan notifikasi: " + error.message); // Alert native lebih terlihat di iOS
     }
 };
 
