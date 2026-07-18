@@ -93,9 +93,10 @@
             
             <div class="flex items-center space-x-3 w-full md:w-auto justify-between md:justify-start">
                 <div class="flex items-center space-x-3">
-                    <div class="bg-gradient-to-tr from-indigo-600 to-violet-500 text-white p-2.5 rounded-xl shadow-lg shadow-indigo-200 dark:shadow-none animate-gradient-x">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    <div class="relative bg-gradient-to-br from-indigo-500 via-purple-500 to-violet-600 text-white p-2.5 rounded-2xl shadow-lg shadow-indigo-300/50 dark:shadow-indigo-900/50 transform transition-transform hover:scale-105">
+                        <div class="absolute inset-0 bg-white/20 rounded-2xl blur-sm animate-pulse"></div>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="relative h-6 w-6 z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
                     </div>
                     <div>
@@ -117,6 +118,14 @@
                     <button onclick="manageData()" class="p-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" title="Backup & Restore Data">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
                     </button>
+                    <div class="relative group" title="Pilih Nada Dering">
+                        <select id="ringtone-selector" onchange="changeRingtone()" class="appearance-none p-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-sm font-bold focus:outline-none cursor-pointer pr-8">
+                            <option value="https://cdn.pixabay.com/download/audio/2021/10/25/audio_51d454378f.mp3?filename=alarm-clock-short-6402.mp3">🔔 Standar</option>
+                            <option value="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8b817555f.mp3?filename=digital-alarm-clock-151920.mp3">⏰ Digital</option>
+                            <option value="https://cdn.pixabay.com/download/audio/2021/08/09/audio_65902096a6.mp3?filename=soft-bells-10023.mp3">✨ Chime</option>
+                        </select>
+                        <svg class="w-4 h-4 absolute right-2 top-3 pointer-events-none text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                    </div>
                     <button onclick="toggleTheme()" class="p-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
                         <svg id="theme-icon-sun" class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                         <svg id="theme-icon-moon" class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
@@ -632,6 +641,29 @@ document.body.addEventListener('click', function unlockAudio() {
     }).catch(err => console.log('Audio unlock tertunda: ', err));
     document.body.removeEventListener('click', unlockAudio);
 }, { once: true });
+
+// Fungsi mengganti dan preview nada dering
+function changeRingtone() {
+    const selector = document.getElementById('ringtone-selector');
+    const audio = document.getElementById('alarmSound');
+    audio.src = selector.value;
+    localStorage.setItem('scheduly_ringtone', selector.value);
+    
+    // Play preview 2 detik
+    audio.play().then(() => {
+        setTimeout(() => {
+            audio.pause();
+            audio.currentTime = 0;
+        }, 2000);
+    }).catch(e => console.log('Preview tertahan kebijakan browser'));
+}
+
+// Tambahkan ini di dalam window.addEventListener('DOMContentLoaded', () => { ... })
+const savedRingtone = localStorage.getItem('scheduly_ringtone');
+if(savedRingtone) {
+    document.getElementById('ringtone-selector').value = savedRingtone;
+    document.getElementById('alarmSound').src = savedRingtone;
+}
 
 // ================= UPGRADE: APP BADGING API =================
 // Memunculkan angka jumlah jadwal yang belum selesai di Ikon Aplikasi HP
