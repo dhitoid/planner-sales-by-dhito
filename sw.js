@@ -2,6 +2,7 @@
 importScripts('https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js');
 
+
 // 1. Inisialisasi Firebase di Background (Ganti config ini dengan milik Firebase kamu)
 firebase.initializeApp({
   apiKey: "AIzaSyDheNr02M_ReVweMi1hD9S4VRlnW3NqaIE",
