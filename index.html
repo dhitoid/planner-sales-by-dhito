@@ -90,66 +90,66 @@
     </div>
 
     <header class="glass border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50 shadow-sm transition-colors duration-300">
-        <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            
-            <div class="flex items-center space-x-3 w-full md:w-auto justify-between md:justify-start">
+        <div class="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8">
+            <!-- Top Section: Logo & Actions -->
+            <div class="flex justify-between items-center mb-3 sm:mb-0 sm:pb-3 sm:border-b sm:border-slate-200 dark:sm:border-slate-700/50">
+                <!-- Logo -->
                 <div class="flex items-center space-x-3">
-                    <div class="relative bg-gradient-to-br from-indigo-500 via-purple-500 to-violet-600 text-white p-2.5 rounded-2xl shadow-lg shadow-indigo-300/50 dark:shadow-indigo-900/50 transform transition-transform hover:scale-105">
-                        <div class="absolute inset-0 bg-white/20 rounded-2xl blur-sm animate-pulse"></div>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="relative h-6 w-6 z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div class="relative bg-gradient-to-br from-indigo-500 via-purple-500 to-violet-600 text-white p-2 sm:p-2.5 rounded-xl sm:rounded-2xl shadow-lg shadow-indigo-300/50 dark:shadow-indigo-900/50 transform transition-transform hover:scale-105">
+                        <div class="absolute inset-0 bg-white/20 rounded-xl sm:rounded-2xl blur-sm animate-pulse"></div>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="relative h-5 w-5 sm:h-6 sm:w-6 z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
                     </div>
                     <div>
-                        <h1 class="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center">
-                            Scheduly <span class="text-[10px] font-bold px-2 py-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-full ml-2 uppercase tracking-wider shadow-sm">Pro</span>
+                        <h1 class="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center">
+                            Scheduly <span class="text-[9px] sm:text-[10px] font-bold px-2 py-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-full ml-2 uppercase tracking-wider shadow-sm">Pro</span>
                         </h1>
-                        <span id="current-time" class="block text-xs text-indigo-600 dark:text-indigo-400 font-bold"></span>
+                        <span id="current-time" class="block text-[10px] sm:text-xs text-indigo-600 dark:text-indigo-400 font-bold"></span>
                     </div>
                 </div>
-                
-                <div class="flex items-center space-x-2">
-                    <button id="btn-logout" class="p-2.5 bg-rose-50 dark:bg-rose-950/40 text-rose-600 rounded-xl hover:bg-rose-100 transition-colors hidden" title="Keluar Akun">
-    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-</button>
-                    <button id="noti-btn" onclick="requestNotificationPermission()" class="p-2.5 bg-amber-50 dark:bg-amber-950/40 text-amber-600 rounded-xl hidden relative" title="Aktifkan Alarm Pengingat">
+
+                <!-- Action Buttons -->
+                <div class="flex items-center space-x-1.5 sm:space-x-2">
+                    <button id="noti-btn" onclick="requestNotificationPermission()" class="p-2 sm:p-2.5 bg-amber-50 dark:bg-amber-950/40 text-amber-600 rounded-xl hidden relative transition-colors hover:bg-amber-100" title="Aktifkan Alarm">
                         <span class="absolute top-0 right-0 flex h-2.5 w-2.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span></span>
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
                     </button>
-                    <button onclick="manageData()" class="p-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" title="Backup & Restore Data">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                    <button onclick="manageData()" class="p-2 sm:p-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
                     </button>
-                    <div class="relative group" title="Pilih Nada Dering">
-                        <select id="ringtone-selector" onchange="changeRingtone()" class="appearance-none p-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-sm font-bold focus:outline-none cursor-pointer pr-8">
-                            <option value="https://cdn.pixabay.com/download/audio/2021/10/25/audio_51d454378f.mp3?filename=alarm-clock-short-6402.mp3">🔔 Standar</option>
-                            <option value="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8b817555f.mp3?filename=digital-alarm-clock-151920.mp3">⏰ Digital</option>
-                            <option value="https://cdn.pixabay.com/download/audio/2021/08/09/audio_65902096a6.mp3?filename=soft-bells-10023.mp3">✨ Chime</option>
-                        </select>
-                        <svg class="w-4 h-4 absolute right-2 top-3 pointer-events-none text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                    </div>
-                    <button onclick="toggleTheme()" class="p-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
-                        <svg id="theme-icon-sun" class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                        <svg id="theme-icon-moon" class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                    <button onclick="toggleTheme()" class="p-2 sm:p-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                        <svg id="theme-icon-sun" class="w-4 h-4 sm:w-5 sm:h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                        <svg id="theme-icon-moon" class="w-4 h-4 sm:w-5 sm:h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                    </button>
+                    <button id="btn-logout" class="p-2 sm:p-2.5 bg-rose-50 dark:bg-rose-950/40 text-rose-600 rounded-xl hover:bg-rose-100 transition-colors hidden">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                     </button>
                 </div>
             </div>
 
-            <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
-                <div class="bg-slate-100 dark:bg-slate-800 p-1 rounded-xl flex w-full sm:w-auto">
+            <!-- Bottom Section: Search & Filters -->
+            <div class="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 sm:pt-3 w-full">
+                <div class="bg-slate-100 dark:bg-slate-800 p-1 rounded-xl flex w-full sm:w-auto shrink-0">
                     <button id="btn-view-timeline" onclick="switchMainView('timeline')" class="flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-white dark:bg-slate-700 shadow-sm text-indigo-600 dark:text-white">Timeline</button>
-                    <button id="btn-view-calendar" onclick="switchMainView('calendar')" class="flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">Kalender Bulanan</button>
+                    <button id="btn-view-calendar" onclick="switchMainView('calendar')" class="flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">Kalender</button>
                 </div>
 
-                <div class="relative w-full sm:w-48" id="search-wrapper">
+                <div class="relative w-full flex-grow" id="search-wrapper">
                     <input type="text" id="search-input" placeholder="Cari jadwal..." class="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white backdrop-blur-sm transition-all">
                     <svg class="w-4 h-4 absolute left-3 top-2.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
                 
-                <select id="view-selector" class="w-full sm:w-auto px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 text-sm font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer backdrop-blur-sm">
-                    <option value="7">7 Hari</option>
-                    <option value="14">14 Hari</option>
-                    <option value="30">30 Hari</option>
-                </select>
+                <div class="flex gap-2 w-full sm:w-auto shrink-0">
+                    <select id="ringtone-selector" onchange="changeRingtone()" class="flex-1 sm:w-auto px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 text-xs font-medium text-slate-700 dark:text-slate-200 focus:outline-none cursor-pointer">
+                        <option value="https://cdn.pixabay.com/download/audio/2021/10/25/audio_51d454378f.mp3">🔔 Standar</option>
+                        <option value="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8b817555f.mp3">⏰ Digital</option>
+                    </select>
+                    <select id="view-selector" class="flex-1 sm:w-auto px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 text-xs font-medium text-slate-700 dark:text-slate-200 focus:outline-none cursor-pointer">
+                        <option value="7">7 Hari</option>
+                        <option value="14">14 Hari</option>
+                    </select>
+                </div>
             </div>
         </div>
     </header>
@@ -525,38 +525,14 @@ window.togglePomodoro = () => {
 // Menggunakan penanda versi baru agar memori lokal bersih
 let advancedNotifiedEvents = JSON.parse(localStorage.getItem('scheduly_notified_v2')) || {};
 
-// ================= UPGRADE: NOTIFIKASI BACKGROUND & WEB WORKER =================
-
-// 1. Perbaiki Fungsi Minta Izin (Hapus kode Firebase yang error)
-window.requestNotificationPermission = async () => {
-    if (!('Notification' in window) || !('serviceWorker' in navigator)) {
-        Swal.fire('Oops', 'Browser ini tidak mendukung notifikasi Web. (Pengguna iOS: pastikan Add to Home Screen)', 'error');
-        return;
-    }
-
-    try {
-        const permission = await Notification.requestPermission();
-        if (permission === 'granted') {
-            document.getElementById('noti-btn').classList.add('hidden');
-            // Daftarkan service worker
-            await navigator.serviceWorker.register('sw.js');
-            showToast("Sistem Pengingat Aktif!", "success");
-        } else {
-            Swal.fire('Izin Ditolak', 'Izinkan notifikasi melalui pengaturan browser/sistem.', 'warning');
-        }
-    } catch (error) {
-        alert("Gagal mengaktifkan notifikasi: " + error.message);
-    }
-};
-
-// 2. Fungsi Pengecekan Jadwal (Di-upgrade untuk menggunakan Service Worker)
 function checkUpcomingReminders() {
-    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    // Fungsi ini kini hanya bertindak sebagai cadangan saat aplikasi dalam keadaan TERBUKA/AKTIF di layar
+    if (document.hidden || !('Notification' in window) || Notification.permission !== 'granted') return;
     
     const now = new Date();
     const currentExactTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes());
 
-    window.events.forEach(e => {
+    events.forEach(e => {
         if (e.completed) return;
         
         let shouldCheck = e.date === now.toISOString().split('T')[0];
@@ -570,61 +546,40 @@ function checkUpcomingReminders() {
             const diffMinutes = Math.round((eventExactTime.getTime() - currentExactTime.getTime()) / 60000);
             const notiKey = `${e.id}_${now.toISOString().split('T')[0]}`;
 
-            if (!window.advancedNotifiedEvents[notiKey]) window.advancedNotifiedEvents[notiKey] = [];
+            if (!advancedNotifiedEvents[notiKey]) advancedNotifiedEvents[notiKey] = [];
 
             let triggerType = null;
             let notifTitle = '';
             let notifBody = '';
 
-            if (diffMinutes === 5 && !window.advancedNotifiedEvents[notiKey].includes('5')) {
+            if (diffMinutes === 5 && !advancedNotifiedEvents[notiKey].includes('5')) {
                 triggerType = '5';
                 notifTitle = `🚨 Segera Mulai: ${e.title}`;
-                notifBody = `Bersiaplah! Agenda dimulai dalam 5 menit.`;
-            } else if (diffMinutes === 0 && !window.advancedNotifiedEvents[notiKey].includes('0')) {
+                notifBody = `Bersiaplah! Agenda ini dimulai dalam 5 menit.`;
+            } else if (diffMinutes === 0 && !advancedNotifiedEvents[notiKey].includes('0')) {
                 triggerType = '0';
                 notifTitle = `▶️ Waktunya: ${e.title}`;
                 notifBody = `Agenda sedang berlangsung sekarang!`;
             }
 
             if (triggerType !== null) {
-                window.advancedNotifiedEvents[notiKey].push(triggerType);
-                localStorage.setItem('scheduly_notified_v2', JSON.stringify(window.advancedNotifiedEvents));
+                advancedNotifiedEvents[notiKey].push(triggerType);
+                localStorage.setItem('scheduly_notified_v2', JSON.stringify(advancedNotifiedEvents));
 
-                // GUNAKAN SERVICE WORKER UNTUK NOTIFIKASI MOBILE
-                if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.ready.then(reg => {
-                        reg.showNotification(notifTitle, {
-                            body: notifBody,
-                            icon: 'https://cdn-icons-png.flaticon.com/512/8336/8336048.png',
-                            vibrate: [500, 200, 500, 200, 500],
-                            requireInteraction: true,
-                            tag: notiKey // Mencegah notifikasi dobel
-                        });
-                    });
-                }
+                const notifOptions = {
+                    body: notifBody,
+                    icon: 'https://cdn-icons-png.flaticon.com/512/8336/8336048.png',
+                    requireInteraction: true
+                };
 
-                // Bunyikan audio jika web sedang aktif
-                if (triggerType === '0' && !document.hidden) playAlarm(notifTitle, notifBody);
+                new Notification(notifTitle, notifOptions);
+                if (triggerType === '0') playAlarm(notifTitle, notifBody);
             }
         }
     });
 }
-
-// 3. HAPUS setInterval lama, GANTI dengan Web Worker agar anti-tidur
-// Worker berjalan di thread terpisah, sehingga OS lebih jarang mematikannya
-const workerCode = `
-    setInterval(() => {
-        postMessage('check_time');
-    }, 20000); // Cek tiap 20 detik
-`;
-const blob = new Blob([workerCode], { type: 'application/javascript' });
-const timerWorker = new Worker(URL.createObjectURL(blob));
-
-timerWorker.onmessage = (e) => {
-    if (e.data === 'check_time') {
-        checkUpcomingReminders();
-    }
-};
+// Interval diturunkan ke 30 detik untuk efisiensi baterai saat aplikasi menyala
+setInterval(checkUpcomingReminders, 30000);
 
 
         function switchMainView(view) {
@@ -735,6 +690,54 @@ function updateStatsWidgets() {
         }
     }
 }
+
+// ================= PERBAIKAN: NOTIFIKASI iOS & ANDROID =================
+window.requestNotificationPermission = async () => {
+    // 1. Cek dukungan browser
+    if (!('Notification' in window)) {
+        Swal.fire('Oops', 'Perangkat ini belum mendukung notifikasi web. Pastikan Anda sudah "Add to Home Screen" jika menggunakan iOS.', 'error');
+        return;
+    }
+
+    try {
+        // 2. Minta Izin
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+            showToast("Meminta akses server...", "success");
+            document.getElementById('noti-btn').classList.add('hidden');
+
+            // 3. Pastikan Service Worker terdaftar dan SIAP
+            const registration = await navigator.serviceWorker.register('sw.js');
+            await navigator.serviceWorker.ready; // Wajib untuk iOS
+
+            // 4. Ambil Token FCM
+            const currentToken = await getToken(messaging, { 
+                vapidKey: 'BOtb83DGTEGgp9jDHOhW-5x16b4lX8px3AmsGruHU3s1ZuIPWjXYw-SbMzmwqMDGGifRhw9U259s5FCvQeSyu14', 
+                serviceWorkerRegistration: registration 
+            });
+
+            if (currentToken) {
+                console.log("FCM Token:", currentToken);
+                if (currentUser) {
+                    await setDoc(doc(db, "users", currentUser.uid), {
+                        fcmToken: currentToken,
+                        notifEnabled: true
+                    }, { merge: true });
+                    showToast("Sistem Pengingat Aktif!", "success");
+                } else {
+                    showToast("Harap login terlebih dahulu untuk menyimpan token.", "warning");
+                }
+            } else {
+                showToast("Gagal mendapatkan token notifikasi. Coba lagi.", "error");
+            }
+        } else {
+            Swal.fire('Izin Ditolak', 'Anda memblokir notifikasi. Izinkan melalui pengaturan browser/sistem untuk menerima pengingat.', 'warning');
+        }
+    } catch (error) {
+        console.error('Error token:', error);
+        alert("Gagal mengaktifkan notifikasi: " + error.message); // Alert native lebih terlihat di iOS
+    }
+};
 
         window.toggleCompleteEvent = (id) => {
             let justCompleted = false;
@@ -1468,6 +1471,69 @@ if (currentToken) {
 			window.syncToCloudDebounced();
 		}
 	};
+</script>
+
+<!-- Masukkan ini SEBELUM tag penutup </body> -->
+<script type="module">
+    // Import Firebase dari CDN
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
+
+    // WAJIB: Ganti config ini dengan config dari Firebase Project kamu
+	const firebaseConfig = {
+	  apiKey: "AIzaSyDheNr02M_ReVweMi1hD9S4VRlnW3NqaIE",
+	  authDomain: "scheduly-pro.firebaseapp.com",
+	  projectId: "scheduly-pro",
+	  storageBucket: "scheduly-pro.firebasestorage.app",
+	  messagingSenderId: "792259340926",
+	  appId: "1:792259340926:web:a675394c4b76801bba062f"
+	};
+
+    const app = initializeApp(firebaseConfig);
+    const messaging = getMessaging(app);
+
+    // Fungsi Request Permission yang di-upgrade
+    window.requestNotificationPermission = async () => {
+        if (!('Notification' in window)) {
+            Swal.fire('Oops', 'Perangkat ini belum mendukung notifikasi web.', 'error');
+            return;
+        }
+
+        try {
+            const permission = await Notification.requestPermission();
+            if (permission === 'granted') {
+                showToast("Meminta akses server...", "success");
+                document.getElementById('noti-btn').classList.add('hidden');
+
+                const registration = await navigator.serviceWorker.register('sw.js');
+                await navigator.serviceWorker.ready;
+
+                // Menggunakan Vapid Key kamu
+                const currentToken = await getToken(messaging, { 
+                    vapidKey: 'BOtb83DGTEGgp9jDHOhW-5x16b4lX8px3AmsGruHU3s1ZuIPWjXYw-SbMzmwqMDGGifRhw9U259s5FCvQeSyu14', 
+                    serviceWorkerRegistration: registration 
+                });
+
+                if (currentToken) {
+                    console.log("FCM Token didapat:", currentToken);
+                    // Simpan token ini ke database backend kamu (jika ada)
+                    localStorage.setItem('fcm_token', currentToken);
+                    showToast("Sistem Pengingat Latar Belakang Aktif!", "success");
+                }
+            } else {
+                Swal.fire('Izin Ditolak', 'Izinkan notifikasi melalui pengaturan browser.', 'warning');
+            }
+        } catch (error) {
+            console.error('Error notifikasi:', error);
+            alert("Gagal mengaktifkan notifikasi: " + error.message);
+        }
+    };
+
+    // Tangkap pesan saat aplikasi sedang terbuka
+    onMessage(messaging, (payload) => {
+        console.log('Pesan masuk saat aplikasi aktif:', payload);
+        playAlarm(payload.notification.title, payload.notification.body);
+    });
 </script>
 
 </body>
