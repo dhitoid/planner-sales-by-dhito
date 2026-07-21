@@ -525,14 +525,38 @@ window.togglePomodoro = () => {
 // Menggunakan penanda versi baru agar memori lokal bersih
 let advancedNotifiedEvents = JSON.parse(localStorage.getItem('scheduly_notified_v2')) || {};
 
+// ================= UPGRADE: NOTIFIKASI BACKGROUND & WEB WORKER =================
+
+// 1. Perbaiki Fungsi Minta Izin (Hapus kode Firebase yang error)
+window.requestNotificationPermission = async () => {
+    if (!('Notification' in window) || !('serviceWorker' in navigator)) {
+        Swal.fire('Oops', 'Browser ini tidak mendukung notifikasi Web. (Pengguna iOS: pastikan Add to Home Screen)', 'error');
+        return;
+    }
+
+    try {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+            document.getElementById('noti-btn').classList.add('hidden');
+            // Daftarkan service worker
+            await navigator.serviceWorker.register('sw.js');
+            showToast("Sistem Pengingat Aktif!", "success");
+        } else {
+            Swal.fire('Izin Ditolak', 'Izinkan notifikasi melalui pengaturan browser/sistem.', 'warning');
+        }
+    } catch (error) {
+        alert("Gagal mengaktifkan notifikasi: " + error.message);
+    }
+};
+
+// 2. Fungsi Pengecekan Jadwal (Di-upgrade untuk menggunakan Service Worker)
 function checkUpcomingReminders() {
-    // Fungsi ini kini hanya bertindak sebagai cadangan saat aplikasi dalam keadaan TERBUKA/AKTIF di layar
-    if (document.hidden || !('Notification' in window) || Notification.permission !== 'granted') return;
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
     
     const now = new Date();
     const currentExactTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes());
 
-    events.forEach(e => {
+    window.events.forEach(e => {
         if (e.completed) return;
         
         let shouldCheck = e.date === now.toISOString().split('T')[0];
@@ -546,40 +570,61 @@ function checkUpcomingReminders() {
             const diffMinutes = Math.round((eventExactTime.getTime() - currentExactTime.getTime()) / 60000);
             const notiKey = `${e.id}_${now.toISOString().split('T')[0]}`;
 
-            if (!advancedNotifiedEvents[notiKey]) advancedNotifiedEvents[notiKey] = [];
+            if (!window.advancedNotifiedEvents[notiKey]) window.advancedNotifiedEvents[notiKey] = [];
 
             let triggerType = null;
             let notifTitle = '';
             let notifBody = '';
 
-            if (diffMinutes === 5 && !advancedNotifiedEvents[notiKey].includes('5')) {
+            if (diffMinutes === 5 && !window.advancedNotifiedEvents[notiKey].includes('5')) {
                 triggerType = '5';
                 notifTitle = `🚨 Segera Mulai: ${e.title}`;
-                notifBody = `Bersiaplah! Agenda ini dimulai dalam 5 menit.`;
-            } else if (diffMinutes === 0 && !advancedNotifiedEvents[notiKey].includes('0')) {
+                notifBody = `Bersiaplah! Agenda dimulai dalam 5 menit.`;
+            } else if (diffMinutes === 0 && !window.advancedNotifiedEvents[notiKey].includes('0')) {
                 triggerType = '0';
                 notifTitle = `▶️ Waktunya: ${e.title}`;
                 notifBody = `Agenda sedang berlangsung sekarang!`;
             }
 
             if (triggerType !== null) {
-                advancedNotifiedEvents[notiKey].push(triggerType);
-                localStorage.setItem('scheduly_notified_v2', JSON.stringify(advancedNotifiedEvents));
+                window.advancedNotifiedEvents[notiKey].push(triggerType);
+                localStorage.setItem('scheduly_notified_v2', JSON.stringify(window.advancedNotifiedEvents));
 
-                const notifOptions = {
-                    body: notifBody,
-                    icon: 'https://cdn-icons-png.flaticon.com/512/8336/8336048.png',
-                    requireInteraction: true
-                };
+                // GUNAKAN SERVICE WORKER UNTUK NOTIFIKASI MOBILE
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.ready.then(reg => {
+                        reg.showNotification(notifTitle, {
+                            body: notifBody,
+                            icon: 'https://cdn-icons-png.flaticon.com/512/8336/8336048.png',
+                            vibrate: [500, 200, 500, 200, 500],
+                            requireInteraction: true,
+                            tag: notiKey // Mencegah notifikasi dobel
+                        });
+                    });
+                }
 
-                new Notification(notifTitle, notifOptions);
-                if (triggerType === '0') playAlarm(notifTitle, notifBody);
+                // Bunyikan audio jika web sedang aktif
+                if (triggerType === '0' && !document.hidden) playAlarm(notifTitle, notifBody);
             }
         }
     });
 }
-// Interval diturunkan ke 30 detik untuk efisiensi baterai saat aplikasi menyala
-setInterval(checkUpcomingReminders, 30000);
+
+// 3. HAPUS setInterval lama, GANTI dengan Web Worker agar anti-tidur
+// Worker berjalan di thread terpisah, sehingga OS lebih jarang mematikannya
+const workerCode = `
+    setInterval(() => {
+        postMessage('check_time');
+    }, 20000); // Cek tiap 20 detik
+`;
+const blob = new Blob([workerCode], { type: 'application/javascript' });
+const timerWorker = new Worker(URL.createObjectURL(blob));
+
+timerWorker.onmessage = (e) => {
+    if (e.data === 'check_time') {
+        checkUpcomingReminders();
+    }
+};
 
 
         function switchMainView(view) {
@@ -690,54 +735,6 @@ function updateStatsWidgets() {
         }
     }
 }
-
-// ================= PERBAIKAN: NOTIFIKASI iOS & ANDROID =================
-window.requestNotificationPermission = async () => {
-    // 1. Cek dukungan browser
-    if (!('Notification' in window)) {
-        Swal.fire('Oops', 'Perangkat ini belum mendukung notifikasi web. Pastikan Anda sudah "Add to Home Screen" jika menggunakan iOS.', 'error');
-        return;
-    }
-
-    try {
-        // 2. Minta Izin
-        const permission = await Notification.requestPermission();
-        if (permission === 'granted') {
-            showToast("Meminta akses server...", "success");
-            document.getElementById('noti-btn').classList.add('hidden');
-
-            // 3. Pastikan Service Worker terdaftar dan SIAP
-            const registration = await navigator.serviceWorker.register('sw.js');
-            await navigator.serviceWorker.ready; // Wajib untuk iOS
-
-            // 4. Ambil Token FCM
-            const currentToken = await getToken(messaging, { 
-                vapidKey: 'BOtb83DGTEGgp9jDHOhW-5x16b4lX8px3AmsGruHU3s1ZuIPWjXYw-SbMzmwqMDGGifRhw9U259s5FCvQeSyu14', 
-                serviceWorkerRegistration: registration 
-            });
-
-            if (currentToken) {
-                console.log("FCM Token:", currentToken);
-                if (currentUser) {
-                    await setDoc(doc(db, "users", currentUser.uid), {
-                        fcmToken: currentToken,
-                        notifEnabled: true
-                    }, { merge: true });
-                    showToast("Sistem Pengingat Aktif!", "success");
-                } else {
-                    showToast("Harap login terlebih dahulu untuk menyimpan token.", "warning");
-                }
-            } else {
-                showToast("Gagal mendapatkan token notifikasi. Coba lagi.", "error");
-            }
-        } else {
-            Swal.fire('Izin Ditolak', 'Anda memblokir notifikasi. Izinkan melalui pengaturan browser/sistem untuk menerima pengingat.', 'warning');
-        }
-    } catch (error) {
-        console.error('Error token:', error);
-        alert("Gagal mengaktifkan notifikasi: " + error.message); // Alert native lebih terlihat di iOS
-    }
-};
 
         window.toggleCompleteEvent = (id) => {
             let justCompleted = false;
