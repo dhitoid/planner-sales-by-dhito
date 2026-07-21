@@ -1277,28 +1277,8 @@ window.requestNotificationPermission = async () => {
     </script>
     
 <script type="module">
-	let syncTimer = null;
-	window.syncToCloudDebounced = async () => {
-		clearTimeout(syncTimer);
-		syncTimer = setTimeout(async () => {
-			if (!currentUser) return;
-			try {
-// Pastikan struktur tanggal dan jam mudah dibaca oleh server nanti
-await setDoc(doc(db, "users", currentUser.uid), {
-    fcmToken: currentToken, // Ini yang paling penting untuk Push Notif
-    events: window.events,
-    lastUpdated: new Date().getTime()
-}, { merge: true });
-				console.log("Cloud synchronized successfully.");
-			} catch (e) {
-				console.error("Gagal sinkron ke cloud", e);
-			}
-		}, 1000);
-	};
-
 	import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 	import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-    // [PENTING] Tambahkan enableIndexedDbPersistence di sini
 	import { getFirestore, enableIndexedDbPersistence, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 	import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-messaging.js"; 
 
@@ -1317,30 +1297,10 @@ await setDoc(doc(db, "users", currentUser.uid), {
 	const messaging = getMessaging(app); 
 	const provider = new GoogleAuthProvider();
 
-    // --- AKTIFKAN DATABASE OFFLINE FIREBASE ---
-    enableIndexedDbPersistence(db).catch((err) => {
-        if (err.code == 'failed-precondition') {
-            console.warn("Fitur offline hanya bisa berjalan di satu tab browser.");
-        } else if (err.code == 'unimplemented') {
-            console.warn("Browser ini tidak mendukung fitur database offline.");
-        }
-    });
-
-    // --- DAFTARKAN SERVICE WORKER SEJAK AWAL ---
-    let swRegistration = null;
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', async () => {
-            try {
-                swRegistration = await navigator.serviceWorker.register('/sw.js');
-                console.log('Service Worker berhasil didaftarkan untuk caching!');
-            } catch (error) {
-                console.error('Gagal mendaftarkan Service Worker:', error);
-            }
-        });
-    }
-
 	let currentUser = null;
+	let currentToken = null; // Disimpan secara global agar aman diakses fungsi lain
 	let unsubscribeEvents = null;
+	let swRegistration = null;
 
 	const originalSetItem = localStorage.setItem;
 
@@ -1348,52 +1308,90 @@ await setDoc(doc(db, "users", currentUser.uid), {
 	const btnLogin = document.getElementById('btn-login-google');
 	const btnLogout = document.getElementById('btn-logout');
 
+	// --- AKTIFKAN DATABASE OFFLINE FIREBASE ---
+	enableIndexedDbPersistence(db).catch((err) => {
+		if (err.code == 'failed-precondition') {
+			console.warn("Fitur offline hanya bisa berjalan di satu tab browser.");
+		} else if (err.code == 'unimplemented') {
+			console.warn("Browser ini tidak mendukung fitur database offline.");
+		}
+	});
+
+	// --- DAFTARKAN SERVICE WORKER SEJAK AWAL ---
+	if ('serviceWorker' in navigator) {
+		window.addEventListener('load', async () => {
+			try {
+				swRegistration = await navigator.serviceWorker.register('/sw.js');
+				console.log('Service Worker berhasil didaftarkan untuk caching!');
+			} catch (error) {
+				console.error('Gagal mendaftarkan Service Worker:', error);
+			}
+		});
+	}
+
+	// --- FUNGSI DEBOUNCED SYNC KE CLOUD ---
+	let syncTimer = null;
+	window.syncToCloudDebounced = async () => {
+		clearTimeout(syncTimer);
+		syncTimer = setTimeout(async () => {
+			if (!currentUser) return;
+			try {
+				await setDoc(doc(db, "users", currentUser.uid), {
+					fcmToken: currentToken || null, // Menggunakan token global yang valid
+					events: window.events,
+					lastUpdated: new Date().getTime()
+				}, { merge: true });
+				console.log("Cloud synchronized successfully.");
+			} catch (e) {
+				console.error("Gagal sinkron ke cloud", e);
+			}
+		}, 1000);
+	};
+
 	// --- FUNGSI MINTA PERMISSION & TOKEN BARU (Diperbarui untuk iOS) ---
 	window.requestNotificationPermission = async () => {
 		if (!('Notification' in window)) {
-            alert("Perangkat atau browser ini belum mendukung notifikasi web.");
-            return;
-        }
+			alert("Perangkat atau browser ini belum mendukung notifikasi web.");
+			return;
+		}
 
 		try {
 			const permission = await Notification.requestPermission();
 			if (permission === 'granted') {
 				showToast("Membuat jalur koneksi ke server...", "success");
-				document.getElementById('noti-btn').classList.add('hidden');
+				const notiBtn = document.getElementById('noti-btn');
+				if (notiBtn) notiBtn.classList.add('hidden');
 
-                // [PERBAIKAN iOS]: Panggil dan pastikan ulang Service Worker secara eksplisit
-                const registration = await navigator.serviceWorker.register('/sw.js');
-                await navigator.serviceWorker.ready; // Wajib tunggu sampai siap di iOS
+				// [PERBAIKAN iOS]: Panggil dan pastikan ulang Service Worker secara eksplisit
+				const registration = await navigator.serviceWorker.register('/sw.js');
+				await navigator.serviceWorker.ready; // Wajib tunggu sampai siap di iOS
 
 				// Ambil Token FCM
-				const currentToken = await getToken(messaging, { 
+				currentToken = await getToken(messaging, { 
 					vapidKey: 'BOtb83DGTEGgp9jDHOhW-5x16b4lX8px3AmsGruHU3s1ZuIPWjXYw-SbMzmwqMDGGifRhw9U259s5FCvQeSyu14', 
 					serviceWorkerRegistration: registration 
 				});
 
-// ... (setelah const currentToken = await getToken(...))
-console.log("Token yang didapat dari Firebase:", currentToken); // Cek ini di console
+				console.log("Token yang didapat dari Firebase:", currentToken);
 
-if (currentToken) {
-    if (currentUser) {
-        await setDoc(doc(db, "users", currentUser.uid), {
-            fcmToken: currentToken
-        }, { merge: true });
-        showToast("Sistem Pengingat Server Aktif!", "success");
-    } else {
-        // Mungkin user belum login
-        showToast("Gagal: Harus login terlebih dahulu.", "error");
-    }
-} else {
-    showToast("Token kosong, silakan coba lagi.", "error");
-}
+				if (currentToken) {
+					if (currentUser) {
+						await setDoc(doc(db, "users", currentUser.uid), {
+							fcmToken: currentToken
+						}, { merge: true });
+						showToast("Sistem Pengingat Server Aktif!", "success");
+					} else {
+						showToast("Gagal: Harus login terlebih dahulu.", "error");
+					}
+				} else {
+					showToast("Token kosong, silakan coba lagi.", "error");
+				}
 			} else {
-                showToast("Izin notifikasi ditolak oleh perangkat.", "error");
-            }
+				showToast("Izin notifikasi ditolak oleh perangkat.", "error");
+			}
 		} catch (error) {
 			console.error('Terjadi error saat mengambil token:', error);
-            // [DEBUGGING iOS]: Gunakan alert agar error dari Safari terlihat jelas di HP
-            alert("Gagal sistem iOS: " + error.message);
+			alert("Gagal sistem iOS: " + error.message);
 			showToast("Gagal menghubungkan: " + error.message, "error");
 		}
 	};
@@ -1402,7 +1400,8 @@ if (currentToken) {
 		if (!currentUser) return;
 		try {
 			await setDoc(doc(db, "users", currentUser.uid), {
-				events: window.events
+				events: window.events,
+				lastUpdated: new Date().getTime()
 			}, { merge: true });
 		} catch (e) {
 			console.error("Gagal sinkron ke cloud", e);
@@ -1433,37 +1432,43 @@ if (currentToken) {
 	onAuthStateChanged(auth, (user) => {
 		if (user) {
 			currentUser = user;
-			// Jika login, sembunyikan pop-up login
-			loginScreen.classList.add('hidden');
-			loginScreen.classList.remove('flex');
-			btnLogout.classList.remove('hidden');
+			if (loginScreen) {
+				loginScreen.classList.add('hidden');
+				loginScreen.classList.remove('flex');
+			}
+			if (btnLogout) btnLogout.classList.remove('hidden');
 			
 			showToast(`Selamat datang, ${user.displayName}!`, "success");
 			listenToCloud(user.uid);
 		} else {
 			currentUser = null;
-			// Jika belum login, baru munculkan pop-up login
-			loginScreen.classList.remove('hidden');
-			loginScreen.classList.add('flex');
-			btnLogout.classList.add('hidden');
+			if (loginScreen) {
+				loginScreen.classList.remove('hidden');
+				loginScreen.classList.add('flex');
+			}
+			if (btnLogout) btnLogout.classList.add('hidden');
 			if (unsubscribeEvents) unsubscribeEvents();
 		}
 	});
 
-	btnLogin.addEventListener('click', () => {
-		signInWithPopup(auth, provider).catch((error) => {
-			showToast("Gagal Login: " + error.message, "error");
+	if (btnLogin) {
+		btnLogin.addEventListener('click', () => {
+			signInWithPopup(auth, provider).catch((error) => {
+				showToast("Gagal Login: " + error.message, "error");
+			});
 		});
-	});
+	}
 
-	btnLogout.addEventListener('click', () => {
-		signOut(auth).then(() => {
-			window.events = [];
-			localStorage.removeItem('scheduly_events');
-			window.renderTimeline();
-			showToast("Berhasil Keluar", "success");
+	if (btnLogout) {
+		btnLogout.addEventListener('click', () => {
+			signOut(auth).then(() => {
+				window.events = [];
+				localStorage.removeItem('scheduly_events');
+				if (typeof window.renderTimeline === 'function') window.renderTimeline();
+				showToast("Berhasil Keluar", "success");
+			});
 		});
-	});
+	}
 
 	localStorage.setItem = function(key, value) {
 		originalSetItem.apply(this, arguments);
@@ -1471,69 +1476,6 @@ if (currentToken) {
 			window.syncToCloudDebounced();
 		}
 	};
-</script>
-
-<!-- Masukkan ini SEBELUM tag penutup </body> -->
-<script type="module">
-    // Import Firebase dari CDN
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
-
-    // WAJIB: Ganti config ini dengan config dari Firebase Project kamu
-	const firebaseConfig = {
-	  apiKey: "AIzaSyDheNr02M_ReVweMi1hD9S4VRlnW3NqaIE",
-	  authDomain: "scheduly-pro.firebaseapp.com",
-	  projectId: "scheduly-pro",
-	  storageBucket: "scheduly-pro.firebasestorage.app",
-	  messagingSenderId: "792259340926",
-	  appId: "1:792259340926:web:a675394c4b76801bba062f"
-	};
-
-    const app = initializeApp(firebaseConfig);
-    const messaging = getMessaging(app);
-
-    // Fungsi Request Permission yang di-upgrade
-    window.requestNotificationPermission = async () => {
-        if (!('Notification' in window)) {
-            Swal.fire('Oops', 'Perangkat ini belum mendukung notifikasi web.', 'error');
-            return;
-        }
-
-        try {
-            const permission = await Notification.requestPermission();
-            if (permission === 'granted') {
-                showToast("Meminta akses server...", "success");
-                document.getElementById('noti-btn').classList.add('hidden');
-
-                const registration = await navigator.serviceWorker.register('sw.js');
-                await navigator.serviceWorker.ready;
-
-                // Menggunakan Vapid Key kamu
-                const currentToken = await getToken(messaging, { 
-                    vapidKey: 'BOtb83DGTEGgp9jDHOhW-5x16b4lX8px3AmsGruHU3s1ZuIPWjXYw-SbMzmwqMDGGifRhw9U259s5FCvQeSyu14', 
-                    serviceWorkerRegistration: registration 
-                });
-
-                if (currentToken) {
-                    console.log("FCM Token didapat:", currentToken);
-                    // Simpan token ini ke database backend kamu (jika ada)
-                    localStorage.setItem('fcm_token', currentToken);
-                    showToast("Sistem Pengingat Latar Belakang Aktif!", "success");
-                }
-            } else {
-                Swal.fire('Izin Ditolak', 'Izinkan notifikasi melalui pengaturan browser.', 'warning');
-            }
-        } catch (error) {
-            console.error('Error notifikasi:', error);
-            alert("Gagal mengaktifkan notifikasi: " + error.message);
-        }
-    };
-
-    // Tangkap pesan saat aplikasi sedang terbuka
-    onMessage(messaging, (payload) => {
-        console.log('Pesan masuk saat aplikasi aktif:', payload);
-        playAlarm(payload.notification.title, payload.notification.body);
-    });
 </script>
 
 </body>
